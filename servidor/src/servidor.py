@@ -12,7 +12,6 @@ class Servidor(SimpleXMLRPCServer):
     def __init__(self, consola, puertoRPC = 8000, addr = None, requestHandler= Handler,
                      logRequests=False, allow_none=False, encoding=None,
                      bind_and_activate=True, use_builtin_types=False):
-        self.hostname = socket.getfqdn()
         self.consola = consola
         self.puerto = puertoRPC
         self.idActual = ''
@@ -43,10 +42,10 @@ class Servidor(SimpleXMLRPCServer):
     
     def correrServidor(self):
         self.serve_forever()
-    
+
 
     #aca va la ejecucion de los metodos que puede ejecutar el cliente
-    def _metodo1(self, id):
+    def _robot(self, id):
         self.idActual = id
         print(id)
         return "Metodo 1"

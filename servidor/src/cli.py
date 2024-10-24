@@ -33,6 +33,12 @@ Inicia el servidor
 Limpia la consola
         """
         subprocess.call('cls', shell = True)
+    def do_agregarUsuario(self, args):
+        """
+Agrega un usuario
+        """
+        args = args.split(" ")
+        print("Agregando usuario: %s" % args[0])
     def do_quit(self, args):
         """
 Salir del programa
@@ -40,6 +46,30 @@ Salir del programa
         self.do_clc("")
         self.do_servidor("off")
         return True
+    def do_robot(self, args):
+        """
+Comando para el robot
+    (robot) [comando]
+    comando:
+        - conectar
+        - desconectar
+        - activar_motores
+        - desactivar_motores
+        """
+        args = args.split()
+        if len(args) == 1:
+            if args[0] == "conectar":
+                print("Conectando...")
+            elif args[0] == "desconectar":
+                print("Desconectando...")
+            elif args[0] == "activar_motores":
+                print("Activando motores...")
+            elif args[0] == "desactivar_motores":
+                print("Desactivando motores...")
+            else:
+                print("Error 1")
+        else:
+            print("Error 2")
     
 
 if __name__ == '__main__':
