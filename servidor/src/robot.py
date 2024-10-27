@@ -7,6 +7,7 @@ class Robot():
         self._timeout = timeout
         self._velMax = velMax
         self.serial = None
+        self.motor = False
         pass
 
     def conectar(self):
@@ -94,6 +95,14 @@ class Robot():
             return f"Puerto cambiado a {puerto}"
         else:
             return ("El puerto no pudo ser Cambiado")
+
+    def desactivar_motor(self):
+        self.motor = False
+        return ("INFO: Motores Desactivados" + self.enviar_comando('M18'))
+
+    def activar_motor(self):
+        self.motor = True
+        return ("INFO: Motores Activados" + self.enviar_comando('M17'))
 
     def __del__(self):
         if self.serial is None:
