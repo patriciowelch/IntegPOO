@@ -22,6 +22,10 @@ class Cliente:
     def __init__(self, usuario, clave):
         self.usuario = usuario
         self.clave = clave
+    def __str__(self):
+        return f'{self.usuario}'
+    def mostrar_clave(self):
+        return self.clave
     
     
 if __name__ == '__main__':

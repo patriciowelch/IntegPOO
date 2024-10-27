@@ -43,7 +43,6 @@ class Servidor(SimpleXMLRPCServer):
     def correrServidor(self):
         self.serve_forever()
 
-
     #aca va la ejecucion de los metodos que puede ejecutar el cliente
     def _robot(self, id):
         self.idActual = id

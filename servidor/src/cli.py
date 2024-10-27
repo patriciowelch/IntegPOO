@@ -1,7 +1,8 @@
 from cmd import Cmd
 from servidor import Servidor
 import subprocess
-from tarea import Tarea
+#from tarea import Tarea
+from robot import Robot
 
 class cli(Cmd):
     def __init__(self):
@@ -10,9 +11,9 @@ class cli(Cmd):
         self.intro = 'Bienvenido'
         self.servidorRpc = None
         self.guardar_comandos = False
+        self.robot = Robot('COM3')
 
     def precmd(self, linea):
-        print("hola")
         linea = linea.lower()
         return linea
             
@@ -73,14 +74,19 @@ Comando para el robot
         if len(args) == 1:
             if args[0] == "conectar":
                 print("Conectando...")
+                print(self.robot.conectar())
             elif args[0] == "desconectar":
                 print("Desconectando...")
+                print(self.robot.desconectar())
             elif args[0] == "activar_motores":
                 print("Activando motores...")
             elif args[0] == "desactivar_motores":
                 print("Desactivando motores...")
             else:
                 print("Error 1")
+        elif len(args) == 2 and args[0] in ["puerto"]:
+            print("Cambiando %s a %s" % (args[0], args[1]))
+            self.robot.cambiar_puerto(args[1])
         else:
             print("Error 2")
 
