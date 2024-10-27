@@ -89,20 +89,26 @@ class Robot():
                 return f"Error inesperado al recibir respuesta: {e}"
 
     def cambiar_puerto(self, puerto):
-        self._puerto = puerto
         if self.serial is not None:
+            self._puerto = puerto
             self.serial.port = puerto
             return f"Puerto cambiado a {puerto}"
         else:
             return ("El puerto no pudo ser Cambiado")
 
     def desactivar_motor(self):
-        self.motor = False
-        return ("INFO: Motores Desactivados" + self.enviar_comando('M18'))
+        if self.serial is None:
+            return "No hay conexión serial abierta"
+        else:
+            self.motor = False
+            return ("INFO: Motores Desactivados" + self.enviar_comando('M18'))
 
     def activar_motor(self):
-        self.motor = True
-        return ("INFO: Motores Activados" + self.enviar_comando('M17'))
+        if self.serial is None:
+            return "No hay conexión serial abierta"
+        else:
+            self.motor = True
+            return ("INFO: Motores Activados" + self.enviar_comando('M17'))
 
     def __del__(self):
         if self.serial is None:
