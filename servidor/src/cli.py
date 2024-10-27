@@ -1,6 +1,7 @@
 from cmd import Cmd
 from servidor import Servidor
 import subprocess
+from tarea import Tarea
 
 class cli(Cmd):
     def __init__(self):
@@ -8,6 +9,12 @@ class cli(Cmd):
         self.prompt = '>>> '
         self.intro = 'Bienvenido'
         self.servidorRpc = None
+        self.guardar_comandos = False
+
+    def precmd(self, linea):
+        linea = linea.lower()
+        return linea
+            
     def do_servidor(self,args):
         """
 Inicia el servidor
@@ -28,24 +35,29 @@ Inicia el servidor
             print("Error 2")
     def estadoServidor(self, mensaje):
         print(mensaje)
+
     def do_clc(self,args):
         """
 Limpia la consola
         """
         subprocess.call('cls', shell = True)
+
     def do_agregarUsuario(self, args):
         """
 Agrega un usuario
         """
         args = args.split(" ")
         print("Agregando usuario: %s" % args[0])
+
+
     def do_quit(self, args):
         """
 Salir del programa
         """
         self.do_clc("")
         self.do_servidor("off")
-        return True
+        raise SystemExit
+
     def do_robot(self, args):
         """
 Comando para el robot
@@ -70,6 +82,20 @@ Comando para el robot
                 print("Error 1")
         else:
             print("Error 2")
+
+    def do_guardarcmd(self, args):
+        if self.guardar_comandos:
+            self.guardar_comandos = False
+            print("Guardado de comandos desactivado")
+        else:
+            self.guardar_comandos = True
+            print("Guardado de comandos activado")
+
+    def default(self, line):
+        if self.guardar_comandos:
+            print("Comando guardado, %s" % line)
+        else:
+            print("Comando no reconocido: %s" % line)
     
 
 if __name__ == '__main__':
