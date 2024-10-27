@@ -8,6 +8,7 @@ class Robot():
         self._baudrate = baudrate
         self._timeout = timeout
         self.serial = None
+        print ("hola")
         pass
 
     def conectar(self):
@@ -48,8 +49,9 @@ class Robot():
 ##BORRAR ESTO AL TERMINAR CON ROBOT
 if __name__ == '__main__':
     try:
-        robot = Robot('COM5')
+        robot = Robot('COM3')
         print(robot.conectar())
+        
         raise SystemExit
     except KeyboardInterrupt:
         print('Saliendo disconforme...')
