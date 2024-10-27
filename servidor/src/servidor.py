@@ -27,7 +27,7 @@ class Servidor(SimpleXMLRPCServer):
             print(e)
 
         #aca se agregan los metodos que son accesibles al cliente
-        self.register_function(self._metodo1, 'metodo1')
+        self.register_function(self._robot, 'robot')
         self.register_function(self._listarMetodos, 'listarMetodos')
 
         self.hiloRPC = Thread(target = self.correrServidor, daemon = True)
