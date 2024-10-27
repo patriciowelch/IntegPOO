@@ -12,6 +12,7 @@ class cli(Cmd):
         self.guardar_comandos = False
 
     def precmd(self, linea):
+        print("hola")
         linea = linea.lower()
         return linea
             
