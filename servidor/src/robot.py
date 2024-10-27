@@ -14,8 +14,6 @@ class Robot():
         try:
             self.serial = Serial(self._puerto, self._baudrate, timeout=self._timeout)
             self.serial.readline().decode('utf-8').strip()
-            self.serial = Serial(self._puerto, self._baudrate, timeout=self._timeout)
-            self.serial.readline().decode('utf-8').strip()
             mensaje = ""
             while True:
                 info = self.serial.readline().decode('utf-8').strip()
@@ -50,9 +48,8 @@ class Robot():
 ##BORRAR ESTO AL TERMINAR CON ROBOT
 if __name__ == '__main__':
     try:
-        robot = Robot('COM3')
+        robot = Robot('COM5')
         print(robot.conectar())
-        
         raise SystemExit
     except KeyboardInterrupt:
         print('Saliendo disconforme...')
