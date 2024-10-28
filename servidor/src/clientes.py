@@ -4,16 +4,24 @@ class Clientes:
     def __init__(self):
         self.clientes = []
 
-    def agregar_cliente(self, cliente):
-        self.clientes.append(cliente)
+    def agregar_cliente(self, usuario, clave):
+        self.clientes.append(Cliente(usuario, clave))
+        self.guardar_clientes()
+        return 'Cliente agregado'
 
     def guardar_clientes(self):
-        with open('clientes.pkl', 'wb') as archivo:
+        with open('servidor/anexo/clientes.pkl', 'wb') as archivo:
             pickle.dump(self.clientes, archivo)
+    
+    def validar_cliente(self, usuario, clave):
+        for cliente in self.clientes:
+            if cliente.usuario == usuario and cliente.clave == clave:
+                return True
+        return False
 
     def cargar_clientes(self):
         try:
-            with open('clientes.pkl', 'rb') as archivo:
+            with open('servidor/anexo/clientes.pkl', 'rb') as archivo:
                 self.clientes = pickle.load(archivo)
         except FileNotFoundError:
             print('No existe el archivo de clientes')

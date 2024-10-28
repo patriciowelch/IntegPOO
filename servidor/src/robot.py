@@ -18,7 +18,7 @@ class Robot():
             while True:
                 info = self.serial.readline().decode().strip()
                 if info != "":
-                    mensaje += info
+                    mensaje += info+'\n'
                 else :
                     break
             return mensaje
@@ -74,10 +74,9 @@ class Robot():
                 mensaje = ""
                 while True:
                     info = self.serial.readline()
-                    print(info)
                     info = info.decode().strip()
                     if info != "":
-                        mensaje += info
+                        mensaje += info+'\n'
                     else :
                         break
                 return mensaje
@@ -89,12 +88,8 @@ class Robot():
                 return f"Error inesperado al recibir respuesta: {e}"
 
     def cambiar_puerto(self, puerto):
-        if self.serial is not None:
             self._puerto = puerto
-            self.serial.port = puerto
             return f"Puerto cambiado a {puerto}"
-        else:
-            return ("El puerto no pudo ser Cambiado")
 
     def desactivar_motor(self):
         if self.serial is None:

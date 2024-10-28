@@ -2,6 +2,7 @@ from xmlrpc.server import SimpleXMLRPCServer
 from xmlrpc.server import SimpleXMLRPCRequestHandler
 from threading import Thread
 import socket
+from clientes import Clientes, Cliente
 
 class Handler(SimpleXMLRPCRequestHandler):
     def __init__(self, request, client_address, server):
@@ -16,6 +17,8 @@ class Servidor(SimpleXMLRPCServer):
         self.puerto = puertoRPC
         self.idActual = ''
         self.ipCliente = None
+        self.clientes = Clientes()
+        self.clientes.cargar_clientes()
 
         addr = ('127.0.0.1', self.puerto)
 
@@ -44,10 +47,13 @@ class Servidor(SimpleXMLRPCServer):
         self.serve_forever()
 
     #aca va la ejecucion de los metodos que puede ejecutar el cliente
-    def _robot(self, id):
-        self.idActual = id
-        print(id)
-        return "Metodo 1"
+    def _robot(self, usuario, clave):
+        if self.clientes.validar_cliente(usuario, clave):
+            print("Cliente Valido")
+            return "Cliente Valido"
+        else:
+            print("Cliente Invalido")
+            return "Cliente Invalido"
     
     def _listarMetodos(self) -> list[str]:
         return super().system_listMethods()
