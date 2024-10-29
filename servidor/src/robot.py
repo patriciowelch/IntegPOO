@@ -13,12 +13,14 @@ class Robot():
         pass
 
     def addToLog (self, mensaje):
-        # Si la primera palabra del mensaje es "Error", se agrega al log como error si no es un error se agrega como info
-        if mensaje.split()[0] == "Error:" or mensaje.split()[0] == "ERROR:": 
+        # Si la primera palabra del mensaje es "Error", se agrega al log como error, eliminando la palabra ERROR, si no es un error se agrega como info
+        if mensaje.split()[0] == "Error:": 
+            mensaje = mensaje.replace("Error: ","")
             self.log.agregarLinea(mensaje, "ERROR")
         else:
+            mensaje = mensaje.replace("INFO: ","")
             self.log.agregarLinea(mensaje, "INFO")
-        return
+
         
 
 
