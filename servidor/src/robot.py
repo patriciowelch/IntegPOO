@@ -14,11 +14,18 @@ class Robot():
 
     def addToLog (self, mensaje):
         # Si la primera palabra del mensaje es "Error", se agrega al log como error, eliminando la palabra ERROR, si no es un error se agrega como info
+        # Si el ultimo caracter es un salto de linea, se elimina solo el ultimo caracter
+        if mensaje[-1] == '\n':
+            mensaje = mensaje[:-1]
+        if mensaje[-1] == '\r':
+            mensaje = mensaje[:-1]
         if mensaje.split()[0] == "Error:": 
             mensaje = mensaje.replace("Error: ","")
             self.log.agregarLinea(mensaje, "ERROR")
-        else:
+        elif mensaje.split()[0] == "INFO:":
             mensaje = mensaje.replace("INFO: ","")
+            self.log.agregarLinea(mensaje, "INFO MENSAJE DEVUELTO")
+        else:
             self.log.agregarLinea(mensaje, "INFO")
 
         
@@ -158,6 +165,7 @@ class Robot():
             estado += f"Posición actual = {posactual} \n"
             estado += f"Velocidad máxima = {self._velMax} \n"
             self.addToLog("Estado actual del robot solicitado.")
+            self.addToLog(estado)
         return estado
 
         
