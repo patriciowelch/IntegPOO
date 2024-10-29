@@ -7,7 +7,7 @@ class Clientes:
     def agregar_cliente(self, usuario, clave):
         self.clientes.append(Cliente(usuario, clave))
         self.guardar_clientes()
-        return 'Cliente agregado'
+        return 'Cliente \'%s\' agregado' % usuario
 
     def guardar_clientes(self):
         with open('servidor/anexo/clientes.pkl', 'wb') as archivo:

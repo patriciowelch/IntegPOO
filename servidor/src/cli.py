@@ -19,6 +19,19 @@ class cli(Cmd):
     def precmd(self, linea):
         linea = linea.lower()
         return linea
+    
+    def onecmd(self, linea):
+        try: 
+            resultado = super().onecmd(linea)
+            if resultado is not None:
+                print(resultado)
+                if self.guardar_comandos:
+                    print("Comando guardado")
+        except Exception as e:
+            print(e)
+        except SystemExit:
+            print("Saliendo...")
+            raise SystemExit
             
     def do_servidor(self,args):
         """
@@ -32,12 +45,12 @@ Inicia el servidor
             elif args[0] == "off":
                 if self.servidorRpc is not None:
                     self.servidorRpc.detener()
-                    print("Servidor Apagado")
                     self.servidorRpc = None
+                    return "Servidor detenido"
             else:
-                print("Error 1")
+                return "Error 1"
         else:
-            print("Error 2")
+            return "Error 2"
 
     def estadoservidor(self, mensaje):
         print("")
@@ -73,24 +86,19 @@ Comando para el robot
         args = args.split()
         if len(args) == 1:
             if args[0] == "conectar":
-                print("Conectando...")
-                print(self.robot.conectar())
+                return self.robot.conectar()
             elif args[0] == "desconectar":
-                print("Desconectando...")
-                print(self.robot.desconectar())
+                return self.robot.desconectar()
             elif args[0] == "motores_on":
-                print("Activando motores...")
-                print(self.robot.activar_motor())
+                return self.robot.activar_motor()
             elif args[0] == "motores_off":
-                print("Desactivando motores...")
-                print(self.robot.desactivar_motor())
+                return self.robot.desactivar_motor()
             else:
-                print("Error 1")
+                return "Error 1"
         elif len(args) == 2 and args[0] in ["puerto"]:
-            print("Cambiando %s a %s" % (args[0], args[1]))
-            self.robot.cambiar_puerto(args[1])
+            return self.robot.cambiar_puerto(args[1])
         else:
-            print("Error 2")
+            return "Error 2"
 
     def do_home(self, args):
         """
@@ -98,12 +106,10 @@ Realiza el movimiento home del efector final.
         """
         args = args.split()
         if len(args) == 0:
-            print("Realizando movimiento home")
-            resultado = self.robot.enviar_comando('G28')
+            return self.robot.enviar_comando('G28')
         else:
-            print("Error 1")
-            return
-        print(resultado)
+            return "Error 1"
+            
 
     def do_movlin(self, args):
         """
@@ -118,14 +124,12 @@ Realiza el movimiento lineal del efector final.
         args = args.split()
         if len(args) == 3:
             comando = "G1 X%s Y%s Z%s F%s" % (args[0], args[1], args[2], self.robot._velMax)
-            resultado = self.robot.enviar_comando(comando)
+            return self.robot.enviar_comando(comando)
         elif len(args) == 4:
             comando = "G1 X%s Y%s Z%s F%s" % (args[0], args[1], args[2], args[3])
-            resultado = self.robot.enviar_comando(comando)
+            return self.robot.enviar_comando(comando)
         else:
-            print("Error 1")
-            return
-        print(resultado)
+            return "Error 1"
 
     def do_efectorfinal(self, args):
         """
@@ -135,18 +139,15 @@ Controla el efector final del robot.
         args = args.split()
         if len(args) == 1:
             if args[0] == "abrir":
-                print("Abriendo efector final")
-                resultado = self.robot.efector_final('abrir')
+                return self.robot.efector_final('abrir')
             elif args[0] == "cerrar":
                 print("Cerrando efector final")
-                resultado = self.robot.efector_final('cerrar')
+                return self.robot.efector_final('cerrar')
             else:
-                print("Error 1")
-                return
+                return "Error 1"
+                
         else:
-            print("Error 2")
-            return
-        print(resultado)
+            return "Error 2"
 
     def do_modo(self, args):
         """
@@ -156,18 +157,13 @@ Cambia el modo de trabajo del robot entre absoluto y relativo.
         args = args.split()
         if len(args) == 1:
             if args[0] == "abs":
-                print("Cambiando a modo absoluto")
-                resultado = self.robot.enviar_comando('G90')
+                return self.robot.enviar_comando('G90')
             elif args[0] == "rel":
-                print("Cambiando a modo relativo")
-                resultado = self.robot.enviar_comando('G91')
+                return self.robot.enviar_comando('G91')
             else:
-                print("Error 1")
-                return
+                return "Error 1"
         else:
-            print("Error 2")
-            return
-        print(resultado)
+            return "Error 2"
 
     def do_guardarcmd(self, args):
         """
@@ -175,10 +171,10 @@ Inicia o detiene el guardado de comandos
         """
         if self.guardar_comandos:
             self.guardar_comandos = False
-            print("Guardado de comandos desactivado")
+            return "Guardado de comandos desactivado"
         else:
             self.guardar_comandos = True
-            print("Guardado de comandos activado")
+            return "Guardado de comandos activado"
     
     def do_usuarios(self, args):
         """
@@ -189,17 +185,9 @@ Muestra los usuarios
             print("Listando usuarios")
         elif args[0] == "agregar":
             if len(args) == 3:
-                print("Agregando usuario %s" % args[1])
-                print(self.servidorRpc.clientes.agregar_cliente(args[1], args[2]))
+                return self.servidorRpc.clientes.agregar_cliente(args[1], args[2])
             else:
-                print("Error 1")
-        
-
-    def default(self, line):
-        if self.guardar_comandos:
-            print("Comando guardado, %s" % line)
-        else:
-            print("Comando no reconocido: %s" % line)
+                return "Error 1"
     
 
 if __name__ == '__main__':
