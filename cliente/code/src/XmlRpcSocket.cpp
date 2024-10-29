@@ -2,16 +2,17 @@
 #include "XmlRpcSocket.h"
 #include "XmlRpcUtil.h"
 
+#ifndef _WINDOWS
+#define _WINDOWS
+#endif//_WINDOWS
+
 #ifndef MAKEDEPEND
-#include <strings.h>
-#include <string.h>
-using namespace std;
 
 #if defined(_WINDOWS)
 # include <stdio.h>
 
 # include <winsock2.h>
-//# pragma lib(WS2_32.lib)
+//# pragma comment (lib, ws2_32.lib)
 
 # define EINPROGRESS	WSAEINPROGRESS
 # define EWOULDBLOCK	WSAEWOULDBLOCK

@@ -6,6 +6,10 @@
 #include <math.h>
 #include <sys/timeb.h>
 
+#ifndef _WINDOWS
+#define _WINDOWS
+#endif //_WINDOWS
+
 #if defined(_WINDOWS)
 # include <winsock2.h>
 

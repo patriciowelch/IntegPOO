@@ -34,6 +34,8 @@ class Servidor(SimpleXMLRPCServer):
         self.register_function(self._iniciar_sesion, 'iniciar_sesion')
         self.register_function(self._robot, 'robot')
         self.register_function(self._listarMetodos, 'listarMetodos')
+        self.register_function(self._guardar_cmd, 'guardar_cmd')
+        self.register_function(self._defguardar, ':')
 
         self.hiloRPC = Thread(target = self.correrServidor, daemon = True)
         self.hiloRPC.start()
@@ -55,9 +57,24 @@ class Servidor(SimpleXMLRPCServer):
             self.tokensvalidos.append(token)
             return token
         else:
-            return "Usuario o clave incorrectos"
-    def _robot(self, token, comando):
+            return "Error 401: Usuario o clave incorrectos"
+        
+    def _robot(self, token, args):
         pass
-    
-    def _listarMetodos(self) -> list[str]:
-        return super().system_listMethods()
+
+    def _guardar_cmd(self, token, *a):
+        args = list(a)
+        if token in self.tokensvalidos:
+            if len(args) == 1:
+                return self.consola.do_guardarcmd(args[0])+"\nPara guardar un comando escriba ': [comando]' con espacio"
+            elif len(args) == 0:
+                return self.consola.do_guardarcmd("")
+        
+    def _defguardar(self, token, *args):
+        comando = " ".join(args)
+        if token in self.tokensvalidos:
+            return self.consola.onecmd(comando)
+        
+    def _listarMetodos(self):
+        resultado = list(super().system_listMethods())
+        return resultado

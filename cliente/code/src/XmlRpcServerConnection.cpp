@@ -3,13 +3,11 @@
 
 #include "XmlRpcSocket.h"
 #include "XmlRpc.h"
-
-#ifndef MAKEDEPEND
+#ifndef MAKEDEPENDf
 # include <stdio.h>
 # include <stdlib.h>
-#include <strings.h>
-#include <string.h>
-using namespace std;
+# include <cstring>
+# include <strings.h>
 #endif
 
 using namespace XmlRpc;

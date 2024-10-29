@@ -1,12 +1,14 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <strings.h>
-#include <string.h>
-using namespace std;
 
 #include "XmlRpcClient.h"
+
 #include "XmlRpcSocket.h"
 #include "XmlRpc.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <cstring>
+#include <strings.h>
+
 using namespace XmlRpc;
 
 // Static data
