@@ -1,11 +1,10 @@
 from cmd import Cmd
 from servidor import Servidor
 import subprocess
-#from tarea import Tarea
+from tarea import Tarea
 from robot import Robot
 
 class cli(Cmd):
-
     doc_header = 'Comandos documentados (help <comando>):'
 
     def __init__(self):
@@ -14,7 +13,9 @@ class cli(Cmd):
         self.intro = 'Bienvenido'
         self.servidorRpc = None
         self.guardar_comandos = False
-        self.robot = Robot('COM3')
+        self.robot = Robot('COM5')
+        self.tarea = None
+        self.modorobot = 'MAN'
 
     def precmd(self, linea):
         linea = linea.lower()
@@ -24,9 +25,12 @@ class cli(Cmd):
         try: 
             resultado = super().onecmd(linea)
             if resultado is not None:
-                print(resultado)
-                if self.guardar_comandos:
-                    print("Comando guardado")
+                if self.guardar_comandos and self.tarea is not None and not resultado.startswith("╔"):
+                    resultado = resultado.upper()
+                    ultimalinea = self.tarea.agregarLinea(resultado)
+                    print("Comando guardado %s" % ultimalinea)
+                else:
+                    print(resultado)
         except Exception as e:
             print(e)
         except SystemExit:
@@ -148,7 +152,17 @@ Controla el efector final del robot.
                 
         else:
             return "Error 2"
-
+    def do_cargartarea(self, args):
+        """
+Carga una tarea previamente guardada.
+    cargartarea [nombre]
+        """
+        args = args.split()
+        if len(args) == 1:
+            self.tarea = Tarea(args[0])
+            return "Tarea %s cargada" % args[0]
+        else:
+            return "Error 1"
     def do_modo(self, args):
         """
 Cambia el modo de trabajo del robot entre absoluto y relativo.
@@ -168,14 +182,20 @@ Cambia el modo de trabajo del robot entre absoluto y relativo.
     def do_guardarcmd(self, args):
         """
 Inicia o detiene el guardado de comandos
+    guardarcmd [nombre] : inicia el guardado de comandos en nombre
+    guardarcmd : detiene el guardado de comandos
         """
-        if self.guardar_comandos:
+        args = args.split()
+        if args == []:
             self.guardar_comandos = False
+            self.tarea = None
             return "Guardado de comandos desactivado"
-        else:
-            self.guardar_comandos = True
-            return "Guardado de comandos activado"
-    
+        elif args[0] != "":
+            if not self.guardar_comandos:
+                self.guardar_comandos = True
+                self.tarea = Tarea(args[0])
+                return "╔Guardado de comandos activado en %s" % self.tarea._nombre
+            
     def do_usuarios(self, args):
         """
 Muestra los usuarios
@@ -185,9 +205,18 @@ Muestra los usuarios
             print("Listando usuarios")
         elif args[0] == "agregar":
             if len(args) == 3:
-                return self.servidorRpc.clientes.agregar_cliente(args[1], args[2])
+                if self.servidorRpc is not None:
+                    return self.servidorRpc.clientes.agregar_cliente(args[1], args[2])
+                else:
+                    return "Error 1"
             else:
                 return "Error 1"
+    
+    def default(self, linea):
+        if self.guardar_comandos:
+            return linea
+        else:
+            return "Comando no reconocido"
     
 
 if __name__ == '__main__':
