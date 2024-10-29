@@ -1,0 +1,1 @@
+Directorio con los archivos de registro del lado servidor

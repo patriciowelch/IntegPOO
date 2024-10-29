@@ -1,4 +1,6 @@
 import pickle
+import random
+import string
 
 class Clientes:
     def __init__(self):
@@ -18,6 +20,10 @@ class Clientes:
             if cliente.usuario == usuario and cliente.clave == clave:
                 return True
         return False
+    
+    def generar_token(self):
+        #genera un token aleatorio alfanumerico de 10 caracteres
+        return ''.join(random.choices(string.ascii_letters + string.digits, k=10))
 
     def cargar_clientes(self):
         try:

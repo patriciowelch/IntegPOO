@@ -19,6 +19,7 @@ class Servidor(SimpleXMLRPCServer):
         self.ipCliente = None
         self.clientes = Clientes()
         self.clientes.cargar_clientes()
+        self.tokensvalidos = [] 
 
         addr = ('127.0.0.1', self.puerto)
 
@@ -30,6 +31,7 @@ class Servidor(SimpleXMLRPCServer):
             print(e)
 
         #aca se agregan los metodos que son accesibles al cliente
+        self.register_function(self._iniciar_sesion, 'iniciar_sesion')
         self.register_function(self._robot, 'robot')
         self.register_function(self._listarMetodos, 'listarMetodos')
 
@@ -47,13 +49,15 @@ class Servidor(SimpleXMLRPCServer):
         self.serve_forever()
 
     #aca va la ejecucion de los metodos que puede ejecutar el cliente
-    def _robot(self, usuario, clave):
+    def _iniciar_sesion(self, usuario, clave):
         if self.clientes.validar_cliente(usuario, clave):
-            print("Cliente Valido")
-            return "Cliente Valido"
+            token = self.clientes.generar_token()
+            self.tokensvalidos.append(token)
+            return token
         else:
-            print("Cliente Invalido")
-            return "Cliente Invalido"
+            return "Usuario o clave incorrectos"
+    def _robot(self, token, comando):
+        pass
     
     def _listarMetodos(self) -> list[str]:
         return super().system_listMethods()
