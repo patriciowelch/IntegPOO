@@ -88,8 +88,11 @@ class Robot():
                 return f"Error inesperado al recibir respuesta: {e}"
 
     def cambiar_puerto(self, puerto):
-            self._puerto = puerto
-            return f"Puerto cambiado a {puerto}"
+            if self.serial is None:
+                self._puerto = puerto
+                return f"Puerto cambiado a {puerto}"
+            else:
+                return "No se puede cambiar el puerto con la conexión abierta"
 
     def desactivar_motor(self):
         if self.serial is None:
