@@ -61,7 +61,7 @@ class Tarea():
                     return "EOF"
                 f.writelines(lineas)
             f.close()
-            self._ultimaLineaLeida = numeroLinea
+            self._ultimaLineaLeida = numeroLinea - 1
             return self._ultimaLineaLeida
         
         except Exception as e:
