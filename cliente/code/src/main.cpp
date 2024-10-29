@@ -1,7 +1,9 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include "XmlRpc.h"
 
+using namespace XmlRpc;
 using namespace std;
 
 class CLI {
