@@ -74,6 +74,7 @@ Salir del programa
         """
         self.do_clc("")
         self.do_servidor("off")
+        self.robot.desconectar()
         raise SystemExit
 
     def do_robot(self, args):
@@ -163,6 +164,27 @@ Carga una tarea previamente guardada.
             return "Tarea %s cargada" % args[0]
         else:
             return "Error 1"
+        
+    def do_ejecutartarea(self, args):
+        """
+Ejecuta la tarea cargada.
+    ejecutartarea
+        """
+        args = args.split()
+        if len(args) == 0:
+            if self.tarea is not None and self.robot.serial is not None:
+                linea = self.tarea.proximaLinea()
+                while linea != "EOF":
+                    #si la linea inicia con ; es un comentario y no se envia
+                    if not linea.startswith(";"):
+                        resultado = self.robot.enviar_comando(linea)
+                        print(resultado)
+                    linea = self.tarea.proximaLinea()
+            else:
+                return "Error 1"
+        else:
+            return "Error 2"
+
     def do_modo(self, args):
         """
 Cambia el modo de trabajo del robot entre absoluto y relativo.

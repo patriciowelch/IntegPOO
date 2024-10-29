@@ -25,7 +25,6 @@ class Log():
                 f.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} {tipo}: {linea}\n")
             f.close()
             return True
-        
         except Exception as e:
             print(f"Error inesperado: {e}")
             return False

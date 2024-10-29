@@ -40,10 +40,10 @@ class Robot():
             while True:
                 info = self.serial.readline().decode().strip()
                 if info != "":
+                    self.addToLog(info)
                     mensaje += info+'\n'
                 else :
                     break
-            self.addToLog(mensaje)
             return mensaje
         
         except serial.SerialException as e:
@@ -66,6 +66,7 @@ class Robot():
             self.addToLog(f"Desconectando del puerto {self._puerto}...")
             try:
                 self.serial.close()
+                self.serial = None
                 self.addToLog(f"Desconectado del puerto {self._puerto}.")
                 return "Desconectado"
             except serial.SerialException as e:
@@ -106,13 +107,12 @@ class Robot():
             try:
                 mensaje = ""
                 while True:
-                    info = self.serial.readline()
-                    info = info.decode().strip()
+                    info = self.serial.readline().decode().strip()
                     if info != "":
+                        self.addToLog(info)
                         mensaje += info+'\n'
                     else :
                         break
-                self.addToLog(mensaje)
                 return mensaje
             except serial.SerialException as e:
                 print(f"Error al recibir respuesta: {e}")
@@ -168,25 +168,11 @@ class Robot():
             self.addToLog(estado)
         return estado
 
-        
-        
-
-    def __del__(self):
-        if self.serial is not None:
-            self.desconectar()
-        pass
-
-
-
-
 ##BORRAR ESTO AL TERMINAR CON ROBOT
 if __name__ == '__main__':
     try:
-        robot = Robot('COM3')
+        robot = Robot('COM5')
         print(robot.conectar())
-        print(robot.efector_final('abrir'))
-        print(robot.efector_final('cerrar'))
-        print(robot.enviar_comando('M114'))
         
         raise SystemExit
     except KeyboardInterrupt:
