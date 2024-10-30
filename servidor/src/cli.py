@@ -21,16 +21,23 @@ class cli(Cmd):
         linea = linea.lower()
         return linea
     
-    def onecmd(self, linea):
+    def onecmd(self, linea, retorno = False):
         try:
             resultado = super().onecmd(linea)
             if resultado is not None:
                 if self.guardar_comandos and self.tarea is not None and not resultado.startswith("╔"):
                     resultado = resultado.upper()
                     ultimalinea = self.tarea.agregarLinea(resultado)
-                    return "Comando guardado %s" % ultimalinea
+                    if retorno:
+                        return "Comando guardado %s" % ultimalinea
+                    else:
+                        print("Comando guardado %s" % ultimalinea)
                 else:
-                    return resultado
+                    if retorno:
+                        return resultado
+                    else:
+                        print(resultado)
+                    
         except Exception as e:
             print(e)
         except SystemExit:

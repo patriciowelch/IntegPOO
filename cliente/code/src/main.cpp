@@ -10,7 +10,7 @@ using namespace std;
 class CLI {
 public:
     CLI(){
-        cout << "Hola mundo\n";
+        cout << "Bienvenido Cliente\n";
         prompt = ">>> ";
     }
 
@@ -46,6 +46,8 @@ private:
             do_quit();
         } else if(comando == "conectar"){
             do_conectar();
+        } else if(comando == "listarMetodos"){
+            do_listarMetodos();
         } else if(find(methods.begin(), methods.end(), comando) != methods.end()){
             XmlRpcValue Args, result;
             Args[0] = token;
@@ -108,6 +110,7 @@ private:
     void do_listarMetodos() {
         XmlRpcValue result;
         XmlRpcValue args;
+        methods.clear();
         vector<string> non_listmethods;
         non_listmethods.push_back("iniciar_sesion");
         try {

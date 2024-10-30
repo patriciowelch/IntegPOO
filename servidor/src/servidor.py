@@ -19,7 +19,7 @@ class Servidor(SimpleXMLRPCServer):
         self.ipCliente = None
         self.clientes = Clientes()
         self.clientes.cargar_clientes()
-        self.tokensvalidos = [] 
+        self.tokensvalidos = []
 
         addr = ('127.0.0.1', self.puerto)
 
@@ -73,7 +73,7 @@ class Servidor(SimpleXMLRPCServer):
     def _defguardar(self, token, *args):
         comando = " ".join(args)
         if token in self.tokensvalidos:
-            return self.consola.onecmd(comando)
+            return self.consola.onecmd(comando, True)
         
     def _listarMetodos(self):
         resultado = list(super().system_listMethods())
