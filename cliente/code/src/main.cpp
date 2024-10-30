@@ -67,17 +67,21 @@ private:
 
     void do_login(){
         cout << "Usuario: ";
-        getline(cin, usuario);
+        //getline(cin, usuario);
+        usuario = "pato";
         cout << "Password: ";
-        getline(cin, password);
+        //getline(cin, password);
+        password = "1234";
     }
 
     void do_setServer(){
         cout << "Host: ";
-        getline(cin, host);
+        //getline(cin, host);
+        host = "127.0.0.1";
         cout << "Port: ";
-        cin >> port;
-        cin.ignore();
+        //cin >> port;
+        port = 8000;
+        //cin.ignore();
     }
 
     void do_conectar() {

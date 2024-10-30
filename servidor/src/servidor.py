@@ -34,8 +34,9 @@ class Servidor(SimpleXMLRPCServer):
         self.register_function(self._iniciar_sesion, 'iniciar_sesion')
         self.register_function(self._robot, 'robot')
         self.register_function(self._listarMetodos, 'listarMetodos')
-        self.register_function(self._guardar_cmd, 'guardar_cmd')
+        self.register_function(self._guardar_cmd, 'guardarcmd')
         self.register_function(self._defguardar, ':')
+        self.register_function(self._help, 'help')
 
         self.hiloRPC = Thread(target = self.correrServidor, daemon = True)
         self.hiloRPC.start()
@@ -69,11 +70,27 @@ class Servidor(SimpleXMLRPCServer):
                 return self.consola.do_guardarcmd(args[0])+"\nPara guardar un comando escriba ': [comando]' con espacio"
             elif len(args) == 0:
                 return self.consola.do_guardarcmd("")
+        else:
+            return "Error 401: Token invalido"
         
     def _defguardar(self, token, *args):
         comando = " ".join(args)
         if token in self.tokensvalidos:
             return self.consola.onecmd(comando, True)
+        else:
+            return "Error 401: Token invalido"
+        
+    def _help(self, token, *args):
+        if token in self.tokensvalidos:
+            if args[0] == "guardarcmd":
+                return (self.consola.do_guardarcmd.__doc__)
+            elif args[0] == "robot":
+                return self.consola.do_robot.__doc__
+            elif args[0] == "listarMetodos":
+                return "Lista los metodos disponibles en el servidor"
+            elif args[0] == ":":
+                return "Guarda el comando ingresado si se encuentra en modo guardado de comandos\n\t: [comando]"
+                
         
     def _listarMetodos(self):
         resultado = list(super().system_listMethods())
