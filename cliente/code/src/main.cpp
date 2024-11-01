@@ -114,6 +114,7 @@ private:
     void do_listarMetodos() {
         XmlRpcValue result;
         XmlRpcValue args;
+        args[0]=this->token;
         methods.clear();
         vector<string> non_listmethods;
         non_listmethods.push_back("iniciar_sesion");

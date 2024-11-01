@@ -32,9 +32,14 @@ class Servidor(SimpleXMLRPCServer):
 
         #aca se agregan los metodos que son accesibles al cliente
         self.register_function(self._iniciar_sesion, 'iniciar_sesion')
-        self.register_function(self._robot, 'robot')
         self.register_function(self._listarMetodos, 'listarMetodos')
         self.register_function(self._guardar_cmd, 'guardarcmd')
+        self.register_function(self._movlin, 'movlin')
+        self.register_function(self._modo, 'modo')
+        self.register_function(self._ejecutartarea, 'ejecutartarea')
+        self.register_function(self._cargartarea, 'cargartarea')
+        self.register_function(self._efectorfinal, 'efectorfinal')
+        self.register_function(self._home, 'home')
         self.register_function(self._defguardar, ':')
         self.register_function(self._help, 'help')
 
@@ -59,9 +64,6 @@ class Servidor(SimpleXMLRPCServer):
             return token
         else:
             return "Error 401: Usuario o clave incorrectos"
-        
-    def _robot(self, token, args):
-        pass
 
     def _guardar_cmd(self, token, *a):
         args = list(a)
@@ -70,6 +72,8 @@ class Servidor(SimpleXMLRPCServer):
                 return self.consola.do_guardarcmd(args[0])+"\nPara guardar un comando escriba ': [comando]' con espacio"
             elif len(args) == 0:
                 return self.consola.do_guardarcmd("")
+            else:
+                return "Error Cantidad de Argumentos Inválido"
         else:
             return "Error 401: Token invalido"
         
@@ -82,16 +86,83 @@ class Servidor(SimpleXMLRPCServer):
         
     def _help(self, token, *args):
         if token in self.tokensvalidos:
-            if args[0] == "guardarcmd":
-                return (self.consola.do_guardarcmd.__doc__)
-            elif args[0] == "robot":
-                return self.consola.do_robot.__doc__
-            elif args[0] == "listarMetodos":
-                return "Lista los metodos disponibles en el servidor"
-            elif args[0] == ":":
-                return "Guarda el comando ingresado si se encuentra en modo guardado de comandos\n\t: [comando]"
-                
+            if len(args)==1:
+                if args[0] == "guardarcmd":
+                    return self.consola.do_guardarcmd.__doc__
+                elif args[0] == "robot":
+                    return self.consola.do_robot.__doc__
+                elif args[0] == "listarMetodos":
+                    return "Lista los metodos disponibles en el servidor"
+                elif args[0] == ":":
+                    return "Guarda el comando ingresado si se encuentra en modo guardado de comandos\n\t: [comando]"
+                else:
+                    return "Error No existe comando identificable"
+            else:
+                return "Error Cantidad de Argumentos Inválido"
+        else:
+            return "Error 401: Token invalido"
         
-    def _listarMetodos(self):
-        resultado = list(super().system_listMethods())
-        return resultado
+    def _home(self, token, *args):
+        if token in self.tokensvalidos:
+            if len(args) == 0:
+                return self.consola.do_home()
+        else:
+            return "Error 401: Token inválido"
+        
+        
+    def _listarMetodos(self, token, *args):
+        if token in self.tokensvalidos:
+            if len(args)==0:
+                resultado = list(super().system_listMethods())
+                return resultado
+            else:
+                return "Error Cantidad de Argumentos Inválido"
+        else:
+            return "Error 401: Token inválido"
+        
+    def _movlin(self, token, *args):
+        if token in self.tokensvalidos:
+            if len(args) == 3:
+                return self.consola.do_movlin(f"{args[0]} {args[1]} {args[2]}")
+            elif len(args) == 4:
+                return self.consola.do_movlin(f"{args[0]} {args[1]} {args[2]} {args[3]}")
+            else:
+                return "Error: Cantidad de argumentos inválido"
+        else:
+            return "Error 401: Token inválido"
+
+    def _modo(self, token, *args):
+        if token in self.tokensvalidos:
+            if len(args) == 1:
+                return self.consola.do_modo(args[0])
+            else:
+                return "Error: Cantidad de argumentos inválido"
+        else:
+            return "Error 401: Token inválido"
+
+    def _ejecutartarea(self, token, *args):
+        if token in self.tokensvalidos:
+            if len(args) == 0:
+                return self.consola.do_ejecutartarea("")
+            else:
+                return "Error: Cantidad de argumentos inválido"
+        else:
+            return "Error 401: Token inválido"
+
+    def _cargartarea(self, token, *args):
+        if token in self.tokensvalidos:
+            if len(args) == 1:
+                return self.consola.do_cargartarea(args[0])
+            else:
+                return "Error: Cantidad de argumentos inválido"
+        else:
+            return "Error 401: Token inválido"
+
+    def _efectorfinal(self, token, *args):
+        if token in self.tokensvalidos:
+            if len(args) == 1:
+                return self.consola.do_efectorfinal(args[0])
+            else:
+                return "Error: Cantidad de argumentos inválido"
+        else:
+            return "Error 401: Token inválido"
