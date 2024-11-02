@@ -37,7 +37,7 @@ class Cliente:
         self.usuario = usuario
         self.clave = clave
     def __str__(self):
-        return f'{self.usuario}'
+        return f'user:{self.usuario} pass:{self.clave}'
     def mostrar_clave(self):
         return self.clave
     

@@ -10,7 +10,7 @@ class Handler(SimpleXMLRPCRequestHandler):
         super().__init__(request, client_address, server)
 
 class Servidor(SimpleXMLRPCServer):
-    def __init__(self, consola, puertoRPC = 8000, addr = None, requestHandler= Handler,
+    def __init__(self, consola, puertoRPC = 25565, addr = None, requestHandler= Handler,
                      logRequests=False, allow_none=False, encoding=None,
                      bind_and_activate=True, use_builtin_types=False):
         self.consola = consola
@@ -21,7 +21,7 @@ class Servidor(SimpleXMLRPCServer):
         self.clientes.cargar_clientes()
         self.tokensvalidos = []
 
-        addr = ('127.0.0.1', self.puerto)
+        addr = ('192.168.1.3', self.puerto)
 
         try:
             super().__init__(addr, requestHandler, logRequests, allow_none, encoding, bind_and_activate,
