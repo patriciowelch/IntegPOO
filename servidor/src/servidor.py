@@ -21,7 +21,6 @@ class Servidor(SimpleXMLRPCServer):
         self.clientes = Clientes()
         self.clientes.cargar_clientes()
         self.tokensvalidos = []
-        self.log = Log("LogServer")
 
         addr = ('127.0.0.1', self.puerto)
 
@@ -167,7 +166,7 @@ class Servidor(SimpleXMLRPCServer):
         if token in self.tokensvalidos:
             if len(args) == 3:
                 self.log.agregarLinea(f"Usuario solicita moverse a la posicion '{args[0]}' '{args[1]}' '{args[2]}'","INFO")
-                return self.log.agregarLinea(self.consola.do_movlin(f"'{args[0]}' '{args[1]}' '{args[2]}'"), "INFO")
+                return self.log.agregarLinea(self.consola.do_movlin(f"{args[0]} {args[1]} {args[2]}"), "INFO")
             elif len(args) == 4:
                 self.log.agregarLinea(f"Usuario solicita moverse a la posicion '{args[0]}' '{args[1]}' '{args[2]}' '{args[3]}'","INFO")
                 return self.log.agregarLinea(self.consola.do_movlin(f"{args[0]} {args[1]} {args[2]} {args[3]}"), "INFO")

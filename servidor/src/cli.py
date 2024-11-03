@@ -3,6 +3,7 @@ from servidor import Servidor
 import subprocess
 from tarea import Tarea
 from robot import Robot
+from log import Log
 
 class cli(Cmd):
     doc_header = 'Comandos documentados (help <comando>):'
@@ -16,6 +17,7 @@ class cli(Cmd):
         self.robot = Robot('COM5')
         self.tarea = None
         self.modorobot = 'MAN'
+        self.log = Log("LogServer")
 
     def precmd(self, linea):
         linea = linea.lower()
@@ -141,10 +143,10 @@ Realiza el movimiento lineal del efector final.
         """
         args = args.split()
         if len(args) == 3:
-            comando = "G1 X%s Y%s Z%s F%s" % (args[0], args[1], args[2], self.robot._velMax)
+            comando = "G1 X%s Y%s Z%s F%s" % (str(args[0]), str(args[1]), str(args[2]), self.robot._velMax)
             return self.robot.enviar_comando(comando)
         elif len(args) == 4:
-            comando = "G1 X%s Y%s Z%s F%s" % (args[0], args[1], args[2], args[3])
+            comando = "G1 X%s Y%s Z%s F%s" % (str(args[0]), str(args[1]), str(args[2]), str(args[3]))
             return self.robot.enviar_comando(comando)
         else:
             raise Exception("Error: Cantidad de Argumentos Incorrecta")

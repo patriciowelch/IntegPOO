@@ -1,2 +1,0 @@
-;Tarea creada
-SERVIDOR DETENIDO
