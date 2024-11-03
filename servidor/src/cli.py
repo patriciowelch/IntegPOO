@@ -103,6 +103,7 @@ Comando para el robot
             - motores_on         Enciende los motores del robot
             - motores_off        Apaga los motores del robot
             - puerto [puerto]    Cambia el puerto del robot
+            - estado             Muestra el estado actual del robot
         """
         args = args.split()
         if len(args) == 1:
@@ -114,6 +115,8 @@ Comando para el robot
                 return self.robot.activar_motor()
             elif args[0] == "motores_off":
                 return self.robot.desactivar_motor()
+            elif args[0] == "estado":
+                return self.robot.estadoActual()
             else:
                 raise Exception("Error: Argumento Invalido")
         elif len(args) == 2 and args[0] in ["puerto"]:
@@ -274,6 +277,19 @@ Muestra los usuarios conectados al servidor o agrega un nuevo usuario
                     raise Exception("Error: Argumento Invalido")
         else:
             raise Exception("Error: El servidor no esta iniciado")
+        
+        def do_log(self, args):
+            """
+            Muestra el log del servidor con las conexiones, los usuarios y los comandos ejecutados por ellos
+            sintaxis: log [Lineas]
+            Lineas: mostrar ultimas "Linea" lineas del log
+            """
+            args = args.split()
+            if len(args) == 1:
+                return self.log.leerLog(args[0])
+            else:
+                raise Exception("Error: Cantidad de Argumentos Incorrecta")
+            
     
     def default(self, linea):
         if self.guardar_comandos:

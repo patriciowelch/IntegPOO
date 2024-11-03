@@ -18,14 +18,19 @@ class Log():
             print(f"Error inesperado: {e}")
             return None
 
-    def agregarLinea(self, linea, tipo, usuario = "", ip = ""):
+    def agregarLinea(self, linea, tipo, usuario = "", ip = "", gerarquiaUsuario = ""):
         ## Agrega una linea al log con el siguiente formato "Fecha Hora Tipo: linea"
         try:
             with open(f"{self.path}\\{self.nombre}.txt", "a") as f:
-                if usuario != "" and ip != "":
-                    f.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} {tipo} IP:{ip} USER:{usuario}: {linea}\n")
-                else:
-                    f.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} {tipo}: {linea}\n")
+                log = f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S') } {tipo}"
+                if ip != "":
+                    log += f" IP: {ip}"
+                if usuario != "":
+                    log += f" USER: {usuario} "
+                if gerarquiaUsuario != "":
+                    log += f" ROL: {gerarquiaUsuario} "
+                log += f": {linea}\n"
+                f.write(log)
             f.close()
             return linea
         except Exception as e:
