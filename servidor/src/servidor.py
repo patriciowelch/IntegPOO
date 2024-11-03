@@ -63,11 +63,10 @@ class Servidor(SimpleXMLRPCServer):
     #aca va la ejecucion de los metodos que puede ejecutar el cliente
     def _iniciar_sesion(self, usuario, clave):
         #obtener la ip de la solicitud
-        print()
-        self.consola.log.agregarLinea(f"Usuario: {usuario} intenta iniciar sesion","INFO",self.ipCliente,usuario)
+        self.consola.log.agregarLinea(f"Usuario: {usuario} intenta iniciar sesion","INFO",usuario,self.ipCliente)
         usuarioValido = self.clientes.validar_cliente(usuario, clave)
         if usuarioValido is not None:
-            self.consola.log.agregarLinea(f"Sesion de {usuarioValido.nick} iniciada con exito","INFO",self.ipCliente,usuarioValido.nick)
+            self.consola.log.agregarLinea(f"Sesion de {usuarioValido.nick} iniciada con exito","INFO",usuarioValido.nick,self.ipCliente)
             token = self.clientes.generar_token()
             usuarioValido.token = token
             self.tokensvalidos.append(token)
