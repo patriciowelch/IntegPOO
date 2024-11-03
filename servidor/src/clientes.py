@@ -46,5 +46,3 @@ class Cliente:
         self.ipActual = None
     def __str__(self):
         return f'user:{self.nick} pass:{self.clave}'
-    def mostrar_clave(self):
-        return self.clave

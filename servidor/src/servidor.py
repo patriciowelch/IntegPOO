@@ -3,11 +3,12 @@ from xmlrpc.server import SimpleXMLRPCRequestHandler
 from threading import Thread
 from log import Log
 import socket
-from clientes import Clientes, Cliente
+from clientes import Clientes
+import base64
 
 class Handler(SimpleXMLRPCRequestHandler):
     def __init__(self, request, client_address, server):
-        server.ip_cliente=client_address[0]
+        server.ipCliente=client_address[0]
         super().__init__(request, client_address, server)
 
 class Servidor(SimpleXMLRPCServer):
@@ -44,6 +45,7 @@ class Servidor(SimpleXMLRPCServer):
         self.register_function(self._home, 'home')
         self.register_function(self._defguardar, ':')
         self.register_function(self._help, 'help')
+        self.register_function(self._enviarArchivo, 'enviarArchivo')
 
         self.hiloRPC = Thread(target = self.correrServidor, daemon = True)
         self.hiloRPC.start()
@@ -69,6 +71,7 @@ class Servidor(SimpleXMLRPCServer):
             self.consola.log.agregarLinea(f"Sesion de {usuarioValido.nick} iniciada con exito","INFO",usuarioValido.nick,self.ipCliente)
             token = self.clientes.generar_token()
             usuarioValido.token = token
+            usuarioValido.ipActual = self.ipCliente
             self.tokensvalidos.append(token)
             return token
         else:
@@ -77,87 +80,96 @@ class Servidor(SimpleXMLRPCServer):
     def _guardar_cmd(self, token, *a):
         args = list(a)
         if token in self.tokensvalidos:
+            usuarioValido = self.clientes.get_usuario_ip_con_token(token)
             if len(args) == 1:
-                self.consola.log.agregarLinea(f"Usuario solicita guardar comando en el archivo {args[0]}","INFO")
-                return self.consola.log.agregarLinea(self.consola.onecmd("guardarcmd "+args[0],True)+"\nPara guardar un comando escriba ': [comando]' con espacio", "INFO")
+                self.consola.log.agregarLinea(f"Usuario solicita guardar comando en el archivo {args[0]}","INFO",usuarioValido.nick,usuarioValido.ipActual)
+                return self.consola.log.agregarLinea(self.consola.onecmd("guardarcmd "+args[0],True)+"\nPara guardar un comando escriba ':[comando]' con espacio", "INFO",usuarioValido.nick,usuarioValido.ipActual)
             elif len(args) == 0:
-                self.consola.log.agregarLinea("Usuario solicita desactivar guardado de comando","INFO")
-                return self.consola.log.agregarLinea(self.consola.onecmd("guardarcmd",True), "INFO")
+                self.consola.log.agregarLinea("Usuario solicita desactivar guardado de comando","INFO",usuarioValido.nick,usuarioValido.ipActual)
+                return self.consola.log.agregarLinea(self.consola.onecmd("guardarcmd",True), "INFO",usuarioValido.nick,usuarioValido.ipActual)
             else:
-                return self.consola.log.agregarLinea("Cantidad de argumentos invalido","ERROR GUARDARCMD")
+                return self.consola.log.agregarLinea("Cantidad de argumentos invalido","ERROR GUARDARCMD",usuarioValido.nick,usuarioValido.ipActual)
         else:
             return self.consola.log.agregarLinea("Token invalido o expirado","ERROR 401")
         
     def _defguardar(self, token, *args):
         comando = " ".join(args)
         if token in self.tokensvalidos:
-            return self.consola.log.agregarLinea(self.consola.onecmd(comando, True))
+            usuarioValido = self.clientes.get_usuario_ip_con_token(token)
+            return self.consola.log.agregarLinea(self.consola.onecmd(comando, True), "INFO",usuarioValido.nick,usuarioValido.ipActual)
         else:
             return self.consola.log.agregarLinea("Token invalido o expirado","ERROR 401")
         
     def _robot(self, token, *args):
         if token in self.tokensvalidos:
+            usuarioValido = self.clientes.get_usuario_ip_con_token(token)
             if(len(args)==1):
-                self.consola.log.agregarLinea(f"Usuario solicita enviar el comando '{args[0]}' al robot","INFO")
-                return self.consola.log.agregarLinea(self.consola.onecmd("robot "+args[0],True), "INFO")
+                self.consola.log.agregarLinea(f"Usuario solicita enviar el comando '{args[0]}' al robot","INFO",usuarioValido.nick,usuarioValido.ipActual)
+                return self.consola.log.agregarLinea(self.consola.onecmd("robot "+args[0],True), "INFO",usuarioValido.nick,usuarioValido.ipActual)
             else:
-                return self.consola.log.agregarLinea("Cantidad de argumentos invalido","ERROR ROBOT")
+                return self.consola.log.agregarLinea("Cantidad de argumentos invalido","ERROR ROBOT",usuarioValido.nick,usuarioValido.ipActual)
         else:
             return self.consola.log.agregarLinea("Token invalido o expirado","ERROR 401")
 
     def _help(self, token, *args):
         if token in self.tokensvalidos:
+            usuarioValido = self.clientes.get_usuario_ip_con_token(token)
             if len(args)==1:
                 if args[0] == "guardarcmd":
-                    self.consola.log.agregarLinea("El usuario solicita informacion de 'guardarcmd'", "INFO")
+                    self.consola.log.agregarLinea("El usuario solicita informacion de 'guardarcmd'", "INFO",usuarioValido.nick,usuarioValido.ipActual)
                     return self.consola.log.agregarLinea(self.consola.do_guardarcmd.__doc__, "INFO")
                 elif args[0] == "robot":
-                    self.consola.log.agregarLinea("El usuario solicita informacion de 'robot'", "INFO")
+                    self.consola.log.agregarLinea("El usuario solicita informacion de 'robot'", "INFO",usuarioValido.nick,usuarioValido.ipActual)
                     return self.consola.log.agregarLinea(self.consola.do_robot.__doc__, "INFO")
                 elif args[0] == "listarMetodos":
-                    self.consola.log.agregarLinea("El usuario solicita informacion de 'listarMetodos'", "INFO")
+                    self.consola.log.agregarLinea("El usuario solicita informacion de 'listarMetodos'", "INFO",usuarioValido.nick,usuarioValido.ipActual)
                     return self.consola.log.agregarLinea("Lista los metodos disponibles en el servidor", "INFO")
                 elif args[0] == ":":
-                    self.consola.log.agregarLinea("El usuario solicita informacion de ':'", "INFO")
-                    return self.consola.log.agregarLinea("Guarda el comando ingresado si se encuentra en modo guardado de comandos\n\t: [comando]", "INFO")
+                    self.consola.log.agregarLinea("El usuario solicita informacion de ':'", "INFO",usuarioValido.nick,usuarioValido.ipActual)
+                    return self.consola.log.agregarLinea("Guarda el comando ingresado si se encuentra en modo guardado de comandos\n\t:[comando]", "INFO")
+                elif args[0] == "enviarArchivo":
+                    self.consola.log.agregarLinea("El usuario solicita informacion de 'enviarArchivo'", "INFO",usuarioValido.nick,usuarioValido.ipActual)
+                    return self.consola.log.agregarLinea("Envia al servidor el archivo en el 'path' descripto\n\tenviarArchivo <path>", "INFO")
                 elif args[0] == "home":
-                    self.consola.log.agregarLinea("El usuario solicita informacion de 'home'", "INFO")
+                    self.consola.log.agregarLinea("El usuario solicita informacion de 'home'", "INFO",usuarioValido.nick,usuarioValido.ipActual)
                     return self.consola.log.agregarLinea(self.consola.do_home.__doc__, "INFO")
                 elif args[0] == "movlin":
-                    self.consola.log.agregarLinea("El usuario solicita informacion de 'movlin'", "INFO")
+                    self.consola.log.agregarLinea("El usuario solicita informacion de 'movlin'", "INFO",usuarioValido.nick,usuarioValido.ipActual)
                     return self.consola.log.agregarLinea(self.consola.do_movlin.__doc__, "INFO")
                 elif args[0] == "modo":
-                    self.consola.log.agregarLinea("El usuario solicita informacion de 'modo'", "INFO")
+                    self.consola.log.agregarLinea("El usuario solicita informacion de 'modo'", "INFO",usuarioValido.nick,usuarioValido.ipActual)
                     return self.consola.log.agregarLinea(self.consola.do_modo.__doc__, "INFO")
                 elif args[0] == "ejecutartarea":
-                    self.consola.log.agregarLinea("El usuario solicita informacion de 'ejecutartarea'", "INFO")
+                    self.consola.log.agregarLinea("El usuario solicita informacion de 'ejecutartarea'", "INFO",usuarioValido.nick,usuarioValido.ipActual)
                     return self.consola.log.agregarLinea(self.consola.do_ejecutartarea.__doc__, "INFO")
                 elif args[0] == "cargartarea":
-                    self.consola.log.agregarLinea("El usuario solicita informacion de 'cargartarea'", "INFO")
+                    self.consola.log.agregarLinea("El usuario solicita informacion de 'cargartarea'", "INFO",usuarioValido.nick,usuarioValido.ipActual)
                     return self.consola.log.agregarLinea(self.consola.do_cargartarea.__doc__, "INFO")
                 elif args[0] == "efectorfinal":
-                    self.consola.log.agregarLinea("El usuario solicita informacion de 'efectorfinal'", "INFO")
+                    self.consola.log.agregarLinea("El usuario solicita informacion de 'efectorfinal'", "INFO",usuarioValido.nick,usuarioValido.ipActual)
                     return self.consola.log.agregarLinea(self.consola.do_efectorfinal.__doc__, "INFO")
                 else:
-                    return self.consola.log.agregarLinea("Comando help no identificable","ERROR HELP")
+                    return self.consola.log.agregarLinea("Comando help no identificable","ERROR HELP",usuarioValido.nick,usuarioValido.ipActual)
             else:
-                return self.consola.log.agregarLinea("Cantidad de argumentos invalido","ERROR HELP")
+                return self.consola.log.agregarLinea("Cantidad de argumentos invalido","ERROR HELP",usuarioValido.nick,usuarioValido.ipActual)
         else:
             return self.consola.log.agregarLinea("Token invalido o expirado","ERROR 401")
         
     def _home(self, token, *args):
         if token in self.tokensvalidos:
+            usuarioValido = self.clientes.get_usuario_ip_con_token(token)
             if len(args) == 0:
-                self.consola.log.agregarLinea("Usuario solicita ir a la posicion home","INFO")
-                return self.consola.log.agregarLinea(self.consola.onecmd("home",True), "INFO")
+                self.consola.log.agregarLinea("Usuario solicita ir a la posicion home","INFO",usuarioValido.nick,usuarioValido.ipActual)
+                return self.consola.log.agregarLinea(self.consola.onecmd("home",True), "INFO",usuarioValido.nick,usuarioValido.ipActual)
         else:
             return self.consola.log.agregarLinea("Token invalido o expirado","ERROR 401")
         
         
     def _listarMetodos(self, token, *args):
         if token in self.tokensvalidos:
+            usuarioValido = self.clientes.get_usuario_ip_con_token(token)
             if len(args)==0:
-                self.consola.log.agregarLinea("Usuario solicita listar los metodos disponibles","INFO")
+                self.consola.log.agregarLinea("Usuario solicita listar los metodos disponibles","INFO",usuarioValido.nick,usuarioValido.ipActual)
                 resultado = list(super().system_listMethods())
                 return resultado
             else:
@@ -167,53 +179,72 @@ class Servidor(SimpleXMLRPCServer):
         
     def _movlin(self, token, *args):
         if token in self.tokensvalidos:
+            usuarioValido = self.clientes.get_usuario_ip_con_token(token)
             if len(args) == 3:
-                self.consola.log.agregarLinea(f"Usuario solicita moverse a la posicion '{args[0]}' '{args[1]}' '{args[2]}'","INFO")
-                return self.consola.log.agregarLinea(self.consola.onecmd("movlin "+f"{args[0]} {args[1]} {args[2]}",True), "INFO")
+                self.consola.log.agregarLinea(f"Usuario solicita moverse a la posicion '{args[0]}' '{args[1]}' '{args[2]}'","INFO",usuarioValido.nick,usuarioValido.ipActual)
+                return self.consola.log.agregarLinea(self.consola.onecmd("movlin "+f"{args[0]} {args[1]} {args[2]}",True), "INFO",usuarioValido.nick,usuarioValido.ipActual)
             elif len(args) == 4:
-                self.consola.log.agregarLinea(f"Usuario solicita moverse a la posicion '{args[0]}' '{args[1]}' '{args[2]}' '{args[3]}'","INFO")
-                return self.consola.log.agregarLinea(self.consola.onecmd("movlin "+f"{args[0]} {args[1]} {args[2]} {args[3]}",True), "INFO")
+                self.consola.log.agregarLinea(f"Usuario solicita moverse a la posicion '{args[0]}' '{args[1]}' '{args[2]}' '{args[3]}'","INFO",usuarioValido.nick,usuarioValido.ipActual)
+                return self.consola.log.agregarLinea(self.consola.onecmd("movlin "+f"{args[0]} {args[1]} {args[2]} {args[3]}",True), "INFO",usuarioValido.nick,usuarioValido.ipActual)
             else:
-                return self.consola.log.agregarLinea("Cantidad de argumentos invalido","ERROR MOVLIN")
+                return self.consola.log.agregarLinea("Cantidad de argumentos invalido","ERROR MOVLIN",usuarioValido.nick,usuarioValido.ipActual)
         else:
             return self.consola.log.agregarLinea("Token invalido o expirado","ERROR 401")
 
     def _modo(self, token, *args):
         if token in self.tokensvalidos:
+            usuarioValido = self.clientes.get_usuario_ip_con_token(token)
             if len(args) == 1:
-                self.consola.log.agregarLinea(f"Usuario solicita cambiar el modo a '{args[0]}'","INFO")
-                return self.consola.log.agregarLinea(self.consola.onecmd("modo "+args[0],True), "INFO")
+                self.consola.log.agregarLinea(f"Usuario solicita cambiar el modo a '{args[0]}'","INFO",usuarioValido.nick,usuarioValido.ipActual)
+                return self.consola.log.agregarLinea(self.consola.onecmd("modo "+args[0],True), "INFO",usuarioValido.nick,usuarioValido.ipActual)
             else:
-                return self.consola.log.agregarLinea("Cantidad de argumentos invalido","ERROR MODO")
+                return self.consola.log.agregarLinea("Cantidad de argumentos invalido","ERROR MODO",usuarioValido.nick,usuarioValido.ipActual)
         else:
             return self.consola.log.agregarLinea("Token invalido o expirado","ERROR 401")
 
     def _ejecutartarea(self, token, *args):
         if token in self.tokensvalidos:
+            usuarioValido = self.clientes.get_usuario_ip_con_token(token)
             if len(args) == 0:
-                self.consola.log.agregarLinea("Usuario solicita ejecutar tarea","INFO")
-                return self.consola.log.agregarLinea(self.consola.onecmd("ejecutartarea",True), "INFO")
+                self.consola.log.agregarLinea("Usuario solicita ejecutar tarea","INFO",usuarioValido.nick,usuarioValido.ipActual)
+                return self.consola.log.agregarLinea(self.consola.onecmd("ejecutartarea",True), "INFO",usuarioValido.nick,usuarioValido.ipActual)
             else:
-                return self.consola.log.agregarLinea("Cantidad de argumentos invalido","ERROR EJECTARTAREA")
+                return self.consola.log.agregarLinea("Cantidad de argumentos invalido","ERROR EJECTARTAREA",usuarioValido.nick,usuarioValido.ipActual)
         else:
             return self.consola.log.agregarLinea("Token invalido o expirado","ERROR 401")
 
     def _cargartarea(self, token, *args):
         if token in self.tokensvalidos:
+            usuarioValido = self.clientes.get_usuario_ip_con_token(token)
             if len(args) == 1:
-                self.consola.log.agregarLinea(f"Usuario solicita cargar la tarea '{args[0]}'","INFO")
-                return self.consola.log.agregarLinea(self.consola.onecmd("cargartarea "+args[0],True), "INFO")
+                self.consola.log.agregarLinea(f"Usuario solicita cargar la tarea '{args[0]}'","INFO",usuarioValido.nick,usuarioValido.ipActual)
+                return self.consola.log.agregarLinea(self.consola.onecmd("cargartarea "+args[0],True), "INFO",usuarioValido.nick,usuarioValido.ipActual)
             else:
-                return self.consola.log.agregarLinea("Cantidad de argumentos invalido","ERROR CARGARTAREA")
+                return self.consola.log.agregarLinea("Cantidad de argumentos invalido","ERROR CARGARTAREA",usuarioValido.nick,usuarioValido.ipActual)
         else:
             return self.consola.log.agregarLinea("Token invalido o expirado","ERROR 401")
 
     def _efectorfinal(self, token, *args):
+        usuarioValido = self.clientes.get_usuario_ip_con_token(token)
         if token in self.tokensvalidos:
             if len(args) == 1:
-                self.consola.log.agregarLinea(f"Usuario solicita mover el efector final a la posicion '{args[0]}'","INFO")
-                return self.consola.log.agregarLinea(self.consola.onecmd("efectorfinal "+args[0],True), "INFO")
+                self.consola.log.agregarLinea(f"Usuario solicita mover el efector final a la posicion '{args[0]}'","INFO",usuarioValido.nick,usuarioValido.ipActual)
+                return self.consola.log.agregarLinea(self.consola.onecmd("efectorfinal "+args[0],True), "INFO",usuarioValido.nick,usuarioValido.ipActual)
             else:
-                return self.consola.log.agregarLinea("Cantidad de argumentos invalido","ERROR EFECTORFINAL")
+                return self.consola.log.agregarLinea("Cantidad de argumentos invalido","ERROR EFECTORFINAL",usuarioValido.nick,usuarioValido.ipActual)
+        else:
+            return self.consola.log.agregarLinea("Token invalido o expirado","ERROR 401")
+        
+    def _enviarArchivo(self, token, *args):
+        if token not in self.tokensvalidos:
+            usuarioValido = self.clientes.get_usuario_ip_con_token(token)
+            self.consola.log.agregarLinea(f"Usuario solicita enviar archivo","INFO",usuarioValido.nick,usuarioValido.ipActual)
+            if len(args) == 1:
+                gcode_content = base64.b64decode(args[0])
+                with open(f"servidor/anexo/Task_Files/{args[0]}.gcode", "wb") as f:
+                    f.write(gcode_content)
+                return self.consola.log.agregarLinea(f"Archivo con nombre {args[0]}.gcode recibido con exito","INFO",usuarioValido.nick,usuarioValido.ipActual)
+            else:
+                return self.consola.log.agregarLinea("Cantidad de argumentos invalido","ERROR ENVIARARCHIVO",usuarioValido.nick,usuarioValido.ipActual)
         else:
             return self.consola.log.agregarLinea("Token invalido o expirado","ERROR 401")
