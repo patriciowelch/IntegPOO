@@ -52,9 +52,10 @@ class cli(Cmd):
     def do_servidor(self,args):
         """
 Inicia el servidor
-    servidor [args]
-        args: on (inicia el servidor)
-              off (detiene el servidor)
+   Sintaxis: servidor [comando]
+        comando:
+            - on        Inicia el servidor
+            - off       Detiene el servidor
         """
         args = args.split()
         if len(args) == 1:
@@ -95,13 +96,13 @@ Salir del programa
     def do_robot(self, args):
         """
 Comando para el robot
-    robot [comando]
-    comando:
-        - conectar
-        - desconectar
-        - motores_on
-        - motores_off
-        - puerto [puerto]
+    Sintaxis: robot [comando]
+        comando:
+            - conectar           Inicializa la conexion el robot al puerto serie
+            - desconectar        Desconecta el robot del puesto serie actual
+            - motores_on         Enciende los motores del robot
+            - motores_off        Apaga los motores del robot
+            - puerto [puerto]    Cambia el puerto del robot
         """
         args = args.split()
         if len(args) == 1:
@@ -123,6 +124,7 @@ Comando para el robot
     def do_home(self, args):
         """
 Realiza el movimiento home del efector final.
+lleva a todas las articulaciones a la posición de origen.
         """
         args = args.split()
         if len(args) == 0:
@@ -154,8 +156,11 @@ Realiza el movimiento lineal del efector final.
     def do_efectorfinal(self, args):
         """
 Controla el efector final del robot.
-    efectorfinal [abrir|cerrar]
-        """
+    Sintaxis: efectorfinal [comando]
+        comando:
+            - abrir     Abre el efector final
+            - cerrar    Cierra el efector final
+ """
         args = args.split()
         if len(args) == 1:
             if args[0] == "abrir":
@@ -170,8 +175,9 @@ Controla el efector final del robot.
         
     def do_cargartarea(self, args):
         """
-Carga una tarea previamente guardada.
-    cargartarea [nombre]
+Carga un archivo de tarea previamente guardado.
+    Sintaxis: cargartarea [nombre]
+        -nombre: nombre del archivo de tarea a cargar
         """
         args = args.split()
         if len(args) == 1:
@@ -182,8 +188,7 @@ Carga una tarea previamente guardada.
         
     def do_ejecutartarea(self, args):
         """
-Ejecuta la tarea cargada.
-    ejecutartarea
+Inicializa la ejecucion de la tarea cargada 
         """
         args = args.split()
         if len(args) == 0:
@@ -206,7 +211,10 @@ Ejecuta la tarea cargada.
     def do_modo(self, args):
         """
 Cambia el modo de trabajo del robot entre absoluto y relativo.
-    modo [abs|rel]
+    Sintaxis: modo [comando]
+        comando:
+            - abs    Cambia el modo de trabajo a absoluto
+            - rel    Cambia el modo de trabajo a relativo
         """
         args = args.split()
         if len(args) == 1:
@@ -222,8 +230,10 @@ Cambia el modo de trabajo del robot entre absoluto y relativo.
     def do_guardarcmd(self, args):
         """
 Inicia o detiene el guardado de comandos
-    guardarcmd [nombre] : inicia el guardado de comandos en nombre
+    guardarcmd [nombre] : inicia el guardado de comandos en el archivo de tarea de nombre "nombre"
     guardarcmd : detiene el guardado de comandos
+
+    ATENCION: Si se inicia el guardado de comandos, todos los comandos ingresados se guardaran en el archivo de tarea especificado hasta que se detenga el guardado mediante guardarcmd.
         """
         args = args.split()
         if len(args)==0 or len(args)==1:
@@ -243,7 +253,11 @@ Inicia o detiene el guardado de comandos
             
     def do_usuarios(self, args):
         """
-Muestra los usuarios
+Muestra los usuarios conectados al servidor o agrega un nuevo usuario
+    Sintaxis: usuarios [comando]
+        comando:
+            - listar                               Muestra los usuarios validos
+            - agregar [nombre] [contraseña]        Agrega un nuevo usuario bajo el nombre y contraseña especificados
         """
         args = args.split()
         if self.servidorRpc is not None:
