@@ -18,14 +18,31 @@ class Log():
             print(f"Error inesperado: {e}")
             return None
 
-    def agregarLinea(self, linea, tipo):
+    def agregarLinea(self, linea, tipo, usuario = "", ip = ""):
         ## Agrega una linea al log con el siguiente formato "Fecha Hora Tipo: linea"
         try:
             with open(f"{self.path}\\{self.nombre}.txt", "a") as f:
-                f.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} {tipo}: {linea}\n")
+                if usuario != "" and ip != "":
+                    f.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} {tipo} IP:{ip} USER:{usuario}: {linea}\n")
+                else:
+                    f.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} {tipo}: {linea}\n")
             f.close()
             return linea
         except Exception as e:
             print(f"Error inesperado: {e}")
             return linea
+        
+    def leerLog(self,ultimasLineas):
+        ## Lee las ultimas lineas del log
+        try:
+            with open(f"{self.path}\\{self.nombre}.txt", "r") as f:
+                lineas = f.readlines()
+                f.close()
+            if ultimasLineas > len(lineas):
+                return lineas #Si se pide mas lineas de las que hay, devuelve todas
+            else:
+                return lineas[-ultimasLineas:]
+        except Exception as e:
+            print(f"Error inesperado: {e}")
+            return None
 
