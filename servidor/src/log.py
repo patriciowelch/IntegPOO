@@ -24,8 +24,8 @@ class Log():
             with open(f"{self.path}\\{self.nombre}.txt", "a") as f:
                 f.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} {tipo}: {linea}\n")
             f.close()
-            return True
+            return linea
         except Exception as e:
             print(f"Error inesperado: {e}")
-            return False
+            return linea
 

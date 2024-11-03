@@ -40,13 +40,3 @@ class Cliente:
         return f'user:{self.usuario} pass:{self.clave}'
     def mostrar_clave(self):
         return self.clave
-    
-    
-if __name__ == '__main__':
-    try:
-        raise SystemExit
-    except KeyboardInterrupt:
-        print('Saliendo disconforme...')
-        exit(0)
-    except SystemExit:
-        print('Saliendo conforme....')
