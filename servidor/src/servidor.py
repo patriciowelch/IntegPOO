@@ -61,12 +61,14 @@ class Servidor(SimpleXMLRPCServer):
 
     #aca va la ejecucion de los metodos que puede ejecutar el cliente
     def _iniciar_sesion(self, usuario, clave):
+        self.log.agregarLinea(f"Usuario: {usuario} intenta iniciar sesion","INFO")
         if self.clientes.validar_cliente(usuario, clave):
+            self.log.agregarLinea(f"Sesion de {usuario} iniciada con exito","INFO")
             token = self.clientes.generar_token()
             self.tokensvalidos.append(token)
             return token
         else:
-            return "Error 401: Usuario o clave incorrectos"
+            return self.log.agregarLinea("Error 401: Usuario o clave incorrectos","ERROR")
 
     def _guardar_cmd(self, token, *a):
         args = list(a)

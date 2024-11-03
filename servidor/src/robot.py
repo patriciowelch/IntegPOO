@@ -167,16 +167,3 @@ class Robot():
             self.addToLog("Estado actual del robot solicitado.")
             self.addToLog(estado)
         return estado
-
-##BORRAR ESTO AL TERMINAR CON ROBOT
-if __name__ == '__main__':
-    try:
-        robot = Robot('COM5')
-        print(robot.conectar())
-        
-        raise SystemExit
-    except KeyboardInterrupt:
-        print('Saliendo disconforme...')
-        exit(0)
-    except SystemExit:
-        print('Saliendo conforme....')

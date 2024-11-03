@@ -47,6 +47,9 @@ class cli(Cmd):
     def do_servidor(self,args):
         """
 Inicia el servidor
+    servidor [args]
+        args: on (inicia el servidor)
+              off (detiene el servidor)
         """
         args = args.split()
         if len(args) == 1:
@@ -87,7 +90,7 @@ Salir del programa
     def do_robot(self, args):
         """
 Comando para el robot
-    (robot) [comando]
+    robot [comando]
     comando:
         - conectar
         - desconectar
