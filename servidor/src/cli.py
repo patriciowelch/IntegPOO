@@ -91,8 +91,8 @@ Comando para el robot
     comando:
         - conectar
         - desconectar
-        - activar_motores
-        - desactivar_motores
+        - motores_on
+        - motores_off
         - puerto [puerto]
         """
         args = args.split()
@@ -232,6 +232,8 @@ Muestra los usuarios
         args = args.split()
         if args[0] == "listar":
             print("Listando usuarios")
+            for usuario in self.servidorRpc.clientes.clientes:
+                print(usuario)
         elif args[0] == "agregar":
             if len(args) == 3:
                 if self.servidorRpc is not None:
