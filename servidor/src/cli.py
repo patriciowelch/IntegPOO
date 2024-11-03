@@ -277,6 +277,19 @@ Muestra los usuarios conectados al servidor o agrega un nuevo usuario
                     raise Exception("Error: Argumento Invalido")
         else:
             raise Exception("Error: El servidor no esta iniciado")
+        
+        def do_log(self, args):
+            """
+            Muestra el log del servidor con las conexiones, los usuarios y los comandos ejecutados por ellos
+            sintaxis: log [Lineas]
+            Lineas: mostrar ultimas "Linea" lineas del log
+            """
+            args = args.split()
+            if len(args) == 1:
+                return self.log.leerLog(args[0])
+            else:
+                raise Exception("Error: Cantidad de Argumentos Incorrecta")
+            
     
     def default(self, linea):
         if self.guardar_comandos:
