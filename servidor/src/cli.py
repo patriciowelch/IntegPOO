@@ -39,7 +39,10 @@ class cli(Cmd):
                         print(resultado)
                     
         except Exception as e:
-            print(e)
+            if retorno:
+                return str(e)
+            else:
+                print(e)
         except SystemExit:
             print("Saliendo...")
             raise SystemExit
@@ -62,9 +65,9 @@ Inicia el servidor
                     self.servidorRpc = None
                     return "Servidor detenido"
             else:
-                return "Error 1"
+                raise Exception("Error: Argumento Invalido")
         else:
-            return "Error 2"
+            raise Exception("Error: Cantidad de Argumentos Incorrecta")
 
     def estadoservidor(self, mensaje):
         print("")
@@ -109,11 +112,11 @@ Comando para el robot
             elif args[0] == "motores_off":
                 return self.robot.desactivar_motor()
             else:
-                return "Error 1"
+                raise Exception("Error: Argumento Invalido")
         elif len(args) == 2 and args[0] in ["puerto"]:
             return self.robot.cambiar_puerto(args[1])
         else:
-            return "Error 2"
+            raise Exception("Error: Cantidad de Argumentos Incorrecta")
 
     def do_home(self, args):
         """
@@ -123,7 +126,7 @@ Realiza el movimiento home del efector final.
         if len(args) == 0:
             return self.robot.enviar_comando('G28')
         else:
-            return "Error 1"
+            raise Exception("Error: Cantidad de Argumentos Incorrecta")
             
 
     def do_movlin(self, args):
@@ -144,7 +147,7 @@ Realiza el movimiento lineal del efector final.
             comando = "G1 X%s Y%s Z%s F%s" % (args[0], args[1], args[2], args[3])
             return self.robot.enviar_comando(comando)
         else:
-            return "Error 1"
+            raise Exception("Error: Cantidad de Argumentos Incorrecta")
 
     def do_efectorfinal(self, args):
         """
@@ -159,10 +162,10 @@ Controla el efector final del robot.
                 print("Cerrando efector final")
                 return self.robot.efector_final('cerrar')
             else:
-                return "Error 1"
-                
+                raise Exception("Error: Argumento Invalido")
         else:
-            return "Error 2"
+            raise Exception("Error: Cantidad de Argumentos Incorrecta")
+        
     def do_cargartarea(self, args):
         """
 Carga una tarea previamente guardada.
@@ -173,7 +176,7 @@ Carga una tarea previamente guardada.
             self.tarea = Tarea(args[0])
             return "Tarea %s cargada" % args[0]
         else:
-            return "Error 1"
+            raise Exception("Error: Cantidad de Argumentos Incorrecta")
         
     def do_ejecutartarea(self, args):
         """
@@ -191,9 +194,12 @@ Ejecuta la tarea cargada.
                         print(resultado)
                     linea = self.tarea.proximaLinea()
             else:
-                return "Error 1"
+                if self.tarea is None:
+                    raise Exception("Error: No hay ninguna tarea cargada")
+                elif self.robot.serial is None:
+                    raise Exception("Error: El puerto serie no esta conectado")
         else:
-            return "Error 2"
+            raise Exception("Error: Cantidad de Argumentos Incorrecta")
 
     def do_modo(self, args):
         """
@@ -207,9 +213,9 @@ Cambia el modo de trabajo del robot entre absoluto y relativo.
             elif args[0] == "rel":
                 return self.robot.enviar_comando('G91')
             else:
-                return "Error 1"
+                raise Exception("Error: Argumento Invalido")
         else:
-            return "Error 2"
+            raise Exception("Error: Cantidad de Argumentos Incorrecta")
 
     def do_guardarcmd(self, args):
         """
@@ -218,39 +224,46 @@ Inicia o detiene el guardado de comandos
     guardarcmd : detiene el guardado de comandos
         """
         args = args.split()
-        if args == []:
-            self.guardar_comandos = False
-            self.tarea = None
-            return "Guardado de comandos desactivado"
-        elif args[0] != "":
-            if not self.guardar_comandos:
-                self.guardar_comandos = True
-                self.tarea = Tarea(args[0])
-                return "╔Guardado de comandos activado en %s" % self.tarea._nombre
+        if len(args)==0 or len(args)==1:
+            if args == []:
+                self.guardar_comandos = False
+                self.tarea = None
+                return "Guardado de comandos desactivado"
+            elif args[0] != "":
+                if not self.guardar_comandos:
+                    self.guardar_comandos = True
+                    self.tarea = Tarea(args[0])
+                    return "╔Guardado de comandos activado en %s" % self.tarea._nombre
+            else:
+                raise Exception("Error: Comando invalido inesperado")
+        else:
+            raise Exception("Error: Cantidad de Argumentos Incorrecta")
             
     def do_usuarios(self, args):
         """
 Muestra los usuarios
         """
         args = args.split()
-        if args[0] == "listar":
-            print("Listando usuarios")
-            for usuario in self.servidorRpc.clientes.clientes:
-                print(usuario)
-        elif args[0] == "agregar":
-            if len(args) == 3:
-                if self.servidorRpc is not None:
-                    return self.servidorRpc.clientes.agregar_cliente(args[1], args[2])
-                else:
-                    return "Error 1"
+        if self.servidorRpc is not None:
+            if args[0] == "listar" and len(args)==1:
+                print("Listando usuarios")
+                for usuario in self.servidorRpc.clientes.clientes:
+                    print(usuario)
+            elif args[0] == "agregar" and len(args)==3:
+                return self.servidorRpc.clientes.agregar_cliente(args[1], args[2])
             else:
-                return "Error 1"
+                if args[0] in ["listar","agregar"]:
+                    raise Exception("Error: Cantidad de Argumentos Incorrecta")
+                else:
+                    raise Exception("Error: Argumento Invalido")
+        else:
+            raise Exception("Error: El servidor no esta iniciado")
     
     def default(self, linea):
         if self.guardar_comandos:
             return linea
         else:
-            return "Comando no reconocido"
+            raise Exception("Error: Comando no reconocido")
     
 
 if __name__ == '__main__':

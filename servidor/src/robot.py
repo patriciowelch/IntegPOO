@@ -87,7 +87,7 @@ class Robot():
         
     def enviar_comando(self, comando):
         if self.serial is None:
-            return "No hay conexión serial abierta"
+            raise Exception("Error: El puerto serie no esta conectado")
         else:
             self.addToLog(f"Enviando comando: {comando}")
             try:

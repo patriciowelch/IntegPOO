@@ -92,7 +92,7 @@ class Servidor(SimpleXMLRPCServer):
     def _robot(self, token, *args):
         if token in self.tokensvalidos:
             if(len(args)==1):
-                return self.consola.do_robot(args[0])
+                return self.consola.onecmd("robot "+args[0],True)
             else:
                 return "Error Cantidad de Argumentos Inválido"
         else:
