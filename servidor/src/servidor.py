@@ -1,6 +1,7 @@
 from xmlrpc.server import SimpleXMLRPCServer
 from xmlrpc.server import SimpleXMLRPCRequestHandler
 from threading import Thread
+from log import Log
 import socket
 from clientes import Clientes, Cliente
 
@@ -10,7 +11,7 @@ class Handler(SimpleXMLRPCRequestHandler):
         super().__init__(request, client_address, server)
 
 class Servidor(SimpleXMLRPCServer):
-    def __init__(self, consola, puertoRPC = 25565, addr = None, requestHandler= Handler,
+    def __init__(self, consola, puertoRPC = 8000, addr = None, requestHandler= Handler,
                      logRequests=False, allow_none=False, encoding=None,
                      bind_and_activate=True, use_builtin_types=False):
         self.consola = consola
@@ -20,8 +21,9 @@ class Servidor(SimpleXMLRPCServer):
         self.clientes = Clientes()
         self.clientes.cargar_clientes()
         self.tokensvalidos = []
+        self.log = Log("LogServer")
 
-        addr = ('192.168.1.3', self.puerto)
+        addr = ('127.0.0.1', self.puerto)
 
         try:
             super().__init__(addr, requestHandler, logRequests, allow_none, encoding, bind_and_activate,
@@ -34,6 +36,7 @@ class Servidor(SimpleXMLRPCServer):
         self.register_function(self._iniciar_sesion, 'iniciar_sesion')
         self.register_function(self._listarMetodos, 'listarMetodos')
         self.register_function(self._guardar_cmd, 'guardarcmd')
+        self.register_function(self._robot, 'robot')
         self.register_function(self._movlin, 'movlin')
         self.register_function(self._modo, 'modo')
         self.register_function(self._ejecutartarea, 'ejecutartarea')
@@ -84,6 +87,15 @@ class Servidor(SimpleXMLRPCServer):
         else:
             return "Error 401: Token invalido"
         
+    def _robot(self, token, *args):
+        if token in self.tokensvalidos:
+            if(len(args)==1):
+                return self.consola.do_robot(args[0])
+            else:
+                return "Error Cantidad de Argumentos Inválido"
+        else:
+            return "Error 401: Token invalido"
+
     def _help(self, token, *args):
         if token in self.tokensvalidos:
             if len(args)==1:
@@ -95,6 +107,18 @@ class Servidor(SimpleXMLRPCServer):
                     return "Lista los metodos disponibles en el servidor"
                 elif args[0] == ":":
                     return "Guarda el comando ingresado si se encuentra en modo guardado de comandos\n\t: [comando]"
+                elif args[0] == "home":
+                    return self.consola.do_home.__doc__
+                elif args[0] == "movlin":
+                    return self.consola.do_movlin.__doc__
+                elif args[0] == "modo":
+                    return self.consola.do_modo.__doc__
+                elif args[0] == "ejecutartarea":
+                    return self.consola.do_ejecutartarea.__doc__
+                elif args[0] == "cargartarea":
+                    return self.consola.do_cargartarea.__doc__
+                elif args[0] == "efectorfinal":
+                    return self.consola.do_efectorfinal.__doc__
                 else:
                     return "Error No existe comando identificable"
             else:

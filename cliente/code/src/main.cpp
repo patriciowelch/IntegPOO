@@ -17,9 +17,17 @@ public:
     void iniciar() {
         string linea;
         while (true) {
-            cout << prompt;
-            getline(cin, linea);
-            procesarComando(linea);
+            try{
+                cout << prompt;
+                getline(cin, linea);
+                procesarComando(linea);
+            } catch (XmlRpcException &e) {
+                cout << "Error: " << e.getMessage() << endl;
+            }  catch (const std::exception &e){
+                cout << e.what() << endl;
+            } catch (...){
+                cout << "Se produjo un error desconocido" << endl;
+            }
         }
     }
 
@@ -30,7 +38,8 @@ private:
     string password;
     string host;
     int port;
-    XmlRpcClient client = XmlRpcClient("localhost", 8080);
+    //XmlRpcClient client = XmlRpcClient("localhost", 8080);
+    XmlRpcClient* client = nullptr;
     vector<string> methods;
 
     void procesarComando(const string &linea) {
@@ -54,14 +63,13 @@ private:
             for (int i = 0; i < args.size(); i++) {
                 Args[i + 1] = args[i];
             }
-            try {
-                client.execute(comando.c_str(), Args, result);
+            if(client->execute(comando.c_str(), Args, result)){
                 cout << static_cast<string>(result) << endl;
-            } catch (XmlRpcException &e) {
-                cout << "Error: " << e.getMessage() << endl;
-            }        
+            } else {
+                throw runtime_error("Error de Conexion");
+            }
         } else {
-            cout << "Comando no reconocido" << endl;
+            throw runtime_error("Comando no reconocido");
         }
     }
 
@@ -83,27 +91,27 @@ private:
     void do_conectar() {
         do_login();
         do_setServer();
-        client = XmlRpcClient(host.c_str(), port);
+        cout << "Conectando a " << host << endl;
+        // Intentar construir el cliente
+        client = new XmlRpcClient(host.c_str(), port);
         XmlRpcValue Args, result;
-        cout << "Connected to " << host << endl;
         // args deberia contener el usuario y la contraseña
         Args[0] = usuario;
         Args[1] = password;
-
         // Ejecutar el método listarMetodos
-        try {
-            client.execute("iniciar_sesion", Args, result);
+        if(client->execute("iniciar_sesion", Args, result)){
             token = static_cast<string>(result);
             //si token no contiene '401:' entonces se ha logrado la conexión
-            if(token.find("401:") == string::npos){
+            if(token.find("401:") == string::npos && token !=""){
                 cout << "Conexion exitosa" << endl;
                 do_listarMetodos();
             } else {
-                cout << token << endl;
+                string drop = token;
                 token = "";
+                throw runtime_error(drop);
             }
-        } catch (XmlRpcException &e) {
-            cout << "Error: " << e.getMessage() << endl;
+        } else {
+            throw runtime_error("Error de Conexion");
         }
     }
 
@@ -114,28 +122,24 @@ private:
         methods.clear();
         vector<string> non_listmethods;
         non_listmethods.push_back("iniciar_sesion");
-        try {
-            // Ejecutar el método "listarMetodos" sin argumentos
-            client.execute("listarMetodos", args, result);
-            // Convertir el resultado a vector de XmlRpcValue y mostrar cada método
-            if (result.getType() == XmlRpcValue::TypeArray) {
-                cout << "\nMethods:\n";
-                for (int i = 0; i < result.size(); i++) {
-                    methods.push_back(static_cast<string>(result[i]));
-                }
-                for (int i = 0; i < methods.size(); i++) {
-                    if(find(non_listmethods.begin(), non_listmethods.end(), methods[i]) != non_listmethods.end()){
-                        methods.erase(methods.begin() + i);
-                    }
-                }
-                for (int i = 0; i < methods.size(); i++) {
-                    cout << methods[i] << endl;
-                }
-            } else {
-                cout << "Error: el resultado no es un array." << endl;
+        // Ejecutar el método "listarMetodos" sin argumentos
+        client->execute("listarMetodos", args, result);
+        // Convertir el resultado a vector de XmlRpcValue y mostrar cada método
+        if (result.getType() == XmlRpcValue::TypeArray) {
+            cout << "\nMetodos:\n";
+            for (int i = 0; i < result.size(); i++) {
+                methods.push_back(static_cast<string>(result[i]));
             }
-        } catch (XmlRpcException &e) {
-            cout << "Error: " << e.getMessage() << endl;
+            for (int i = 0; i < methods.size(); i++) {
+                if(find(non_listmethods.begin(), non_listmethods.end(), methods[i]) != non_listmethods.end()){
+                    methods.erase(methods.begin() + i);
+                }
+            }
+            for (int i = 0; i < methods.size(); i++) {
+                cout << methods[i] << endl;
+            }
+        } else {
+            throw runtime_error("Error: el resultado no es un array.");
         }
     }
 

@@ -91,8 +91,8 @@ Comando para el robot
     comando:
         - conectar
         - desconectar
-        - activar_motores
-        - desactivar_motores
+        - motores_on
+        - motores_off
         - puerto [puerto]
         """
         args = args.split()
