@@ -146,24 +146,24 @@ class Robot():
             return ("INFO: Motores Activados" + self.enviar_comando('M17'))
         
     def estadoActual(self):
-        estado = "INFO: Estado actual del robot: \n"
+        estado = "INFO: Estado actual del robot: "
         if self.serial is None:
-            estado += "Puerto = NA\n"
-            estado += "Baudrate = NA\n"
-            estado += "Timeout = NA\n"
-            estado += "Motores = NA\n"
-            estado += "Posición actual = NA\n"
-            estado += "Velocidad máxima = NA\n"
+            estado += "Puerto = NA "
+            estado += "Baudrate = NA "
+            estado += "Timeout = NA "
+            estado += "Motores = NA "
+            estado += "Posición actual = NA "
+            estado += "Velocidad máxima = NA "
         else:
             self.addToLog("Solicitando estado actual del robot...")
-            estado += f"Puerto = {self._puerto} \n"
-            estado += f"Baudrate = {self._baudrate} \n"
-            estado += f"Timeout = {self._timeout} \n"
-            estado += f"Motores = {self.motor} \n"
+            estado += f"Puerto = {self._puerto} "
+            estado += f"Baudrate = {self._baudrate} "
+            estado += f"Timeout = {self._timeout} "
+            estado += f"Motores = {self.motor} "
             posactual=self.enviar_comando('M114')
             posactual = posactual.replace("INFO:","")
-            estado += f"Posición actual = {posactual} \n"
-            estado += f"Velocidad máxima = {self._velMax} \n"
+            estado += f"Posición actual = {posactual} "
+            estado += f"Velocidad máxima = {self._velMax} "
             self.addToLog("Estado actual del robot solicitado.")
             self.addToLog(estado)
         return estado
