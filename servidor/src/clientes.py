@@ -17,9 +17,9 @@ class Clientes:
     
     def validar_cliente(self, usuario, clave):
         for cliente in self.clientes:
-            if cliente.usuario == usuario and cliente.clave == clave:
-                return True
-        return False
+            if cliente.nick == usuario and cliente.clave == clave:
+                return cliente
+        return None
     
     def generar_token(self):
         #genera un token aleatorio alfanumerico de 10 caracteres
@@ -32,21 +32,17 @@ class Clientes:
         except FileNotFoundError:
             print('No existe el archivo de clientes')
 
+    def get_usuario_ip_con_token(self, token):
+        for cliente in self.clientes:
+            if cliente.token == token:
+                return cliente
+        return None
+
 class Cliente:
     def __init__(self, usuario, clave):
-        self.usuario = usuario
+        self.nick = usuario
         self.clave = clave
+        self.token = None
+        self.ipActual = None
     def __str__(self):
-        return f'{self.usuario}'
-    def mostrar_clave(self):
-        return self.clave
-    
-    
-if __name__ == '__main__':
-    try:
-        raise SystemExit
-    except KeyboardInterrupt:
-        print('Saliendo disconforme...')
-        exit(0)
-    except SystemExit:
-        print('Saliendo conforme....')
+        return f'user:{self.nick} pass:{self.clave}'

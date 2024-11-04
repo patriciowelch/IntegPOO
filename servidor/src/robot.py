@@ -1,14 +1,22 @@
 import serial
 from log import Log
+import json
+import sounddevice as sd
+import numpy as np
+import threading
 
 class Robot():
-    def __init__(self, puerto, baudrate=115200, timeout=1,velMax=100):
-        self._puerto = puerto
-        self._baudrate = baudrate
+    def __init__(self, timeout=1,velMax=100):
+        self.path = "servidor/anexo/serialConfig.json"
+        with open(self.path) as file:
+            data = json.load(file)
+            self._puerto = data["puerto"]
+            self._baudrate = data["baudrate"]
         self._timeout = timeout
         self._velMax = velMax
         self.serial = None
         self.motor = False
+        self.sound_thread = None
         self.log = Log("Log_Robot")
         pass
 
@@ -33,18 +41,22 @@ class Robot():
 
     def conectar(self):
         try:
-            self.addToLog(f"Conectando al puerto {self._puerto}...")
-            self.serial = serial.Serial(self._puerto, self._baudrate, timeout=self._timeout)
-            self.serial.readline().decode().strip()
-            mensaje = ""
-            while True:
-                info = self.serial.readline().decode().strip()
-                if info != "":
-                    self.addToLog(info)
-                    mensaje += info+'\n'
-                else :
-                    break
-            return mensaje
+            if self.serial is None:
+                self.addToLog(f"Conectando al puerto {self._puerto}...")
+                self.serial = serial.Serial(self._puerto, self._baudrate, timeout=self._timeout)
+                self.sonido("conectar")
+                self.serial.readline().decode().strip()
+                mensaje = ""
+                while True:
+                    info = self.serial.readline().decode().strip()
+                    if info != "":
+                        self.addToLog(info)
+                        mensaje += info+'\n'
+                    else :
+                        break
+                return mensaje
+            else:
+                return "Ya hay una conexión serial abierta"
         
         except serial.SerialException as e:
             # Error específico de conexión serial
@@ -67,6 +79,7 @@ class Robot():
             try:
                 self.serial.close()
                 self.serial = None
+                self.sonido("desconectar")
                 self.addToLog(f"Desconectado del puerto {self._puerto}.")
                 return "Desconectado"
             except serial.SerialException as e:
@@ -83,16 +96,42 @@ class Robot():
             return (self.enviar_comando('M5'))
         elif arg == 'cerrar':
             return (self.enviar_comando('M3'))
+        
+    def sonido_no_bloqueante(self, sound):
+        waves=[]
+        for i in range(sound[3]):
+            t= np.linspace(0,sound[0],int(sound[2]*sound[0]))
+            wave = sound[0]*np.sin(2*np.pi*sound[1]*t)
+            waves.append(wave)
+            pause = np.zeros(int(sound[2] * sound[4]))
+            waves.append(pause)
+        full_wave = np.concatenate(waves)
+        sd.play(full_wave,samplerate=sound[2])
+        sd.wait()
             
+    def sonido(self, arg):
+        if arg == 'conectar':
+            sound = [0.2,1318.51,44100,2,0.05]
+        elif arg == 'desconectar':
+            sound = [0.40,1046.5,44100,1,0]
+        elif arg == 'Error':
+            sound = [0.8,1975.53,44100,1,0.07]
+        elif arg == 'comando':
+            sound = [0.4,587.33,44100,3,0.07]
+        self.sound_thread = threading.Thread(target=self.sonido_no_bloqueante, args=(sound,))
+        self.sound_thread.start()
+        
         
     def enviar_comando(self, comando):
         if self.serial is None:
-            return "No hay conexión serial abierta"
+            self.sonido("Error")
+            raise Exception("Error: El puerto serie no esta conectado")
         else:
             self.addToLog(f"Enviando comando: {comando}")
             try:
                 comando += '\r'
                 self.serial.write(comando.encode())
+                self.sonido("comando")
                 self.addToLog(f"Comando enviado: {comando}")
             
             except serial.SerialException as e:
@@ -111,6 +150,8 @@ class Robot():
                     if info != "":
                         self.addToLog(info)
                         mensaje += info+'\n'
+                        if "error" in info.lower():
+                            self.sonido("Error")
                     else :
                         break
                 return mensaje
@@ -124,15 +165,36 @@ class Robot():
                 return f"Error inesperado al recibir respuesta: {e}"
 
     def cambiar_puerto(self, puerto):
-            if self.serial is None:
-                self._puerto = puerto
-                self.addToLog(f"Puerto cambiado a {puerto}")
-                return f"Puerto cambiado a {puerto}"
-            else:
-                return "No se puede cambiar el puerto con la conexión abierta"
+        if self.serial is None:
+            self._puerto = puerto
+            #abrir archivo en lectura y escritura para modificar el puerto
+            with open(self.path, "r+") as file:
+                data = json.load(file)
+                data["puerto"] = puerto
+                file.seek(0)
+                json.dump(data, file, indent=4)
+            self.addToLog(f"Puerto cambiado a {puerto}")
+            return f"Puerto cambiado a {puerto}"
+        else:
+            return "No se puede cambiar el puerto con la conexión abierta"
+    
+    def cambiar_baudrate(self, baudrate):
+        if self.serial is None:
+            self._baudrate = baudrate
+            #abrir archivo en lectura y escritura para modificar el baudrate
+            with open(self.path, "r+") as file:
+                data = json.load(file)
+                data["baudrate"] = baudrate
+                file.seek(0)
+                json.dump(data, file, indent=4)
+            self.addToLog(f"Baudrate cambiado a {baudrate}")
+            return f"Baudrate cambiado a {baudrate}"
+        else:
+            return "No se puede cambiar el baudrate con la conexión abierta"
 
     def desactivar_motor(self):
         if self.serial is None:
+            self.sonido("Error")
             return "No hay conexión serial abierta"
         else:
             self.motor = False
@@ -140,43 +202,31 @@ class Robot():
 
     def activar_motor(self):
         if self.serial is None:
+            self.sonido("Error")
             return "No hay conexión serial abierta"
         else:
             self.motor = True
             return ("INFO: Motores Activados" + self.enviar_comando('M17'))
         
     def estadoActual(self):
-        estado = "INFO: Estado actual del robot: \n"
+        estado = "INFO: Estado actual del robot: "
         if self.serial is None:
-            estado += "Puerto = NA\n"
-            estado += "Baudrate = NA\n"
-            estado += "Timeout = NA\n"
-            estado += "Motores = NA\n"
-            estado += "Posición actual = NA\n"
-            estado += "Velocidad máxima = NA\n"
+            estado += "Puerto = NA "
+            estado += "Baudrate = NA "
+            estado += "Timeout = NA "
+            estado += "Motores = NA "
+            estado += "Posición actual = NA "
+            estado += "Velocidad máxima = NA "
         else:
             self.addToLog("Solicitando estado actual del robot...")
-            estado += f"Puerto = {self._puerto} \n"
-            estado += f"Baudrate = {self._baudrate} \n"
-            estado += f"Timeout = {self._timeout} \n"
-            estado += f"Motores = {self.motor} \n"
+            estado += f"Puerto = {self._puerto} "
+            estado += f"Baudrate = {self._baudrate} "
+            estado += f"Timeout = {self._timeout} "
+            estado += f"Motores = {self.motor} "
             posactual=self.enviar_comando('M114')
             posactual = posactual.replace("INFO:","")
-            estado += f"Posición actual = {posactual} \n"
-            estado += f"Velocidad máxima = {self._velMax} \n"
+            estado += f"Posición actual = {posactual} "
+            estado += f"Velocidad máxima = {self._velMax} "
             self.addToLog("Estado actual del robot solicitado.")
             self.addToLog(estado)
         return estado
-
-##BORRAR ESTO AL TERMINAR CON ROBOT
-if __name__ == '__main__':
-    try:
-        robot = Robot('COM5')
-        print(robot.conectar())
-        
-        raise SystemExit
-    except KeyboardInterrupt:
-        print('Saliendo disconforme...')
-        exit(0)
-    except SystemExit:
-        print('Saliendo conforme....')
