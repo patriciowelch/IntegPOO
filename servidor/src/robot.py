@@ -1,10 +1,14 @@
 import serial
 from log import Log
+import json
 
 class Robot():
-    def __init__(self, puerto, baudrate=115200, timeout=1,velMax=100):
-        self._puerto = puerto
-        self._baudrate = baudrate
+    def __init__(self, timeout=1,velMax=100):
+        self.path = "servidor/anexo/serialConfig.json"
+        with open(self.path) as file:
+            data = json.load(file)
+            self._puerto = data["puerto"]
+            self._baudrate = data["baudrate"]
         self._timeout = timeout
         self._velMax = velMax
         self.serial = None
@@ -33,18 +37,21 @@ class Robot():
 
     def conectar(self):
         try:
-            self.addToLog(f"Conectando al puerto {self._puerto}...")
-            self.serial = serial.Serial(self._puerto, self._baudrate, timeout=self._timeout)
-            self.serial.readline().decode().strip()
-            mensaje = ""
-            while True:
-                info = self.serial.readline().decode().strip()
-                if info != "":
-                    self.addToLog(info)
-                    mensaje += info+'\n'
-                else :
-                    break
-            return mensaje
+            if self.serial is None:
+                self.addToLog(f"Conectando al puerto {self._puerto}...")
+                self.serial = serial.Serial(self._puerto, self._baudrate, timeout=self._timeout)
+                self.serial.readline().decode().strip()
+                mensaje = ""
+                while True:
+                    info = self.serial.readline().decode().strip()
+                    if info != "":
+                        self.addToLog(info)
+                        mensaje += info+'\n'
+                    else :
+                        break
+                return mensaje
+            else:
+                return "Ya hay una conexión serial abierta"
         
         except serial.SerialException as e:
             # Error específico de conexión serial
@@ -124,12 +131,32 @@ class Robot():
                 return f"Error inesperado al recibir respuesta: {e}"
 
     def cambiar_puerto(self, puerto):
-            if self.serial is None:
-                self._puerto = puerto
-                self.addToLog(f"Puerto cambiado a {puerto}")
-                return f"Puerto cambiado a {puerto}"
-            else:
-                return "No se puede cambiar el puerto con la conexión abierta"
+        if self.serial is None:
+            self._puerto = puerto
+            #abrir archivo en lectura y escritura para modificar el puerto
+            with open(self.path, "r+") as file:
+                data = json.load(file)
+                data["puerto"] = puerto
+                file.seek(0)
+                json.dump(data, file, indent=4)
+            self.addToLog(f"Puerto cambiado a {puerto}")
+            return f"Puerto cambiado a {puerto}"
+        else:
+            return "No se puede cambiar el puerto con la conexión abierta"
+    
+    def cambiar_baudrate(self, baudrate):
+        if self.serial is None:
+            self._baudrate = baudrate
+            #abrir archivo en lectura y escritura para modificar el baudrate
+            with open(self.path, "r+") as file:
+                data = json.load(file)
+                data["baudrate"] = baudrate
+                file.seek(0)
+                json.dump(data, file, indent=4)
+            self.addToLog(f"Baudrate cambiado a {baudrate}")
+            return f"Baudrate cambiado a {baudrate}"
+        else:
+            return "No se puede cambiar el baudrate con la conexión abierta"
 
     def desactivar_motor(self):
         if self.serial is None:
