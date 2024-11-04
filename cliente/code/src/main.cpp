@@ -85,6 +85,31 @@ private:
         {
             do_listarMetodos();
         }
+        else if (comando == "help" && args.size()==0){
+            cout << "help <comando> para mas informacion\n";
+            cout << "Comandos: \n";
+            cout << "conectar\t";
+            cout << "listarMetodos\t";
+            cout << "enviarArchivo\t";
+            cout << "help\t";
+            cout << "quit\n";
+            do_listarMetodos();
+        }
+        else if (comando == "help" && args.size()==1 && !(find(methods.begin(), methods.end(), args[0]) != methods.end())){
+            if(args[0] == "conectar"){
+                cout << "hola" <<endl;
+            } else if (args[0] == "listarMetodos"){
+                cout << "hola" <<endl;
+            } else if (args[0] == "enviarArchivo"){
+                cout << "hola" <<endl;
+            } else if (args[0] == "help"){
+                cout << "hola" <<endl;
+            } else if (args[0] == "quit"){
+                cout << "hola" <<endl;
+            } else {
+                cout << "Metodo no encontrado" << endl;
+            }
+        }
         else if (comando == "enviarArchivo")
         {
             string path = args[0];
@@ -166,13 +191,15 @@ private:
 
     void do_listarMetodos()
     {
+        if(client == nullptr){
+            throw runtime_error("No se ha conectado al servidor para obtener la lista de metodos");
+        }
         XmlRpcValue result;
         XmlRpcValue args;
         args[0] = this->token;
         methods.clear();
         vector<string> non_listmethods;
         non_listmethods.push_back("iniciar_sesion");
-        // Ejecutar el método "listarMetodos" sin argumentos
         client->execute("listarMetodos", args, result);
         // Convertir el resultado a vector de XmlRpcValue y mostrar cada método
         if (result.getType() == XmlRpcValue::TypeArray)
@@ -195,8 +222,8 @@ private:
                 if(i%6==0 && i!=0){
                     cout << endl;
                 }
-                cout << endl;
             }
+            cout << endl;
         }
         else
         {
