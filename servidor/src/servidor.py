@@ -23,7 +23,7 @@ class Servidor(SimpleXMLRPCServer):
         self.clientes.cargar_clientes()
         self.tokensvalidos = []
 
-        addr = ('127.0.0.1', self.puerto)
+        addr = ('192.168.0.117', self.puerto)
 
         try:
             super().__init__(addr, requestHandler, logRequests, allow_none, encoding, bind_and_activate,

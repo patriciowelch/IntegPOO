@@ -25,6 +25,8 @@ class cli(Cmd):
     
     def onecmd(self, linea, retorno = False):
         try:
+            if not retorno:
+                self.log.agregarLinea("Comando Ingresado Local: "+linea,"INFO")
             resultado = super().onecmd(linea)
             if resultado is not None:
                 if self.guardar_comandos and self.tarea is not None and not resultado.startswith("$"):
@@ -34,19 +36,23 @@ class cli(Cmd):
                         return "Comando guardado %s" % ultimalinea
                     else:
                         print("Comando guardado %s" % ultimalinea)
+                        self.log.agregarLinea("Comando Guardado: "+ultimalinea,"INFO")
                 else:
                     if retorno:
                         return resultado
                     else:
                         print(resultado)
+                        self.log.agregarLinea("Resultado: "+resultado,"INFO")
                     
         except Exception as e:
             if retorno:
                 return str(e)
             else:
                 print(e)
+                self.log.agregarLinea(str(e),"ERROR")
         except SystemExit:
             print("Saliendo...")
+            self.log.agregarLinea("Saliendo...","INFO")
             raise SystemExit
             
     def do_servidor(self,args):
@@ -108,8 +114,8 @@ Comando para el robot
             - motores_on         Enciende los motores del robot
             - motores_off        Apaga los motores del robot
             - estado             Muestra el estado actual del robot
-            - puerto [puerto] [adminpassword]   Cambia el puerto del robot
-            - baudrate [baudrate] [adminpassword]   Cambia el baudrate del robot
+            - puerto [puerto] [adminpassword]   Cambia el puerto del robot |solo localmente|
+            - baudrate [baudrate] [adminpassword]   Cambia el baudrate del robot |solo localmente|
         """
         args = args.split()
         if len(args) == 1:
