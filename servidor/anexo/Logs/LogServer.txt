@@ -1,9 +1,15 @@
-Log creado: 2024-11-04 17:05:23 
-2024-11-04 17:05:29 INFO: Servidor RPC iniciado en el puerto [('127.0.0.1', 8000)]
-2024-11-04 17:05:41 INFO IP: 127.0.0.1 USER: pato : Usuario: pato intenta iniciar sesion
-2024-11-04 17:05:41 INFO IP: 127.0.0.1 USER: pato : Sesion de pato iniciada con exito
-2024-11-04 17:05:41 INFO IP: 127.0.0.1 USER: pato : Usuario solicita listar los metodos disponibles
-2024-11-04 17:08:27 INFO IP: 127.0.0.1 USER: pato : Usuario: pato intenta iniciar sesion
-2024-11-04 17:08:27 INFO IP: 127.0.0.1 USER: pato : Sesion de pato iniciada con exito
-2024-11-04 17:08:27 INFO IP: 127.0.0.1 USER: pato : Usuario solicita listar los metodos disponibles
-2024-11-04 17:08:31 INFO IP: 127.0.0.1 USER: pato : Usuario solicita listar los metodos disponibles
+Log creado: 2024-11-04 18:19:43 
+2024-11-04 18:19:48 INFO: Servidor RPC iniciado en el puerto [('127.0.0.1', 8000)]
+2024-11-04 18:19:55 INFO IP: 127.0.0.1 USER: jb2000 : Usuario: jb2000 intenta iniciar sesion
+2024-11-04 18:19:55 INFO IP: 127.0.0.1 USER: jb2000 : Sesion de jb2000 iniciada con exito
+2024-11-04 18:19:55 INFO IP: 127.0.0.1 USER: jb2000 : Usuario solicita listar los metodos disponibles
+2024-11-04 18:20:02 INFO IP: 127.0.0.1 USER: jb2000 : Usuario solicita cargar la tarea 'pepe'
+2024-11-04 18:20:02 INFO IP: 127.0.0.1 USER: jb2000 : Tarea pepe cargada
+2024-11-04 18:26:14 INFO IP: 127.0.0.1 USER: jb2000 : Usuario solicita ejecutar tarea
+2024-11-04 18:26:14 INFO IP: 127.0.0.1 USER: jb2000 : Error: El puerto serie no esta conectado
+2024-11-04 18:26:18 INFO IP: 127.0.0.1 USER: jb2000 : Usuario solicita enviar el comando 'conectar' al robot
+2024-11-04 18:26:21 INFO IP: 127.0.0.1 USER: jb2000 : INFO: ROBOT ONLINE
+INFO: SEND G28 TO CALIBRATE
+
+2024-11-04 18:26:22 INFO IP: 127.0.0.1 USER: jb2000 : Usuario solicita ejecutar tarea
+2024-11-04 18:26:24 INFO IP: 127.0.0.1 USER: jb2000 : Tarea ejecutada

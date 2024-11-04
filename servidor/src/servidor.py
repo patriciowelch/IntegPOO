@@ -83,7 +83,7 @@ class Servidor(SimpleXMLRPCServer):
             usuarioValido = self.clientes.get_usuario_ip_con_token(token)
             if len(args) == 1:
                 self.consola.log.agregarLinea(f"Usuario solicita guardar comando en el archivo {args[0]}","INFO",usuarioValido.nick,usuarioValido.ipActual)
-                return self.consola.log.agregarLinea(self.consola.onecmd("guardarcmd "+args[0],True)+"\nPara guardar un comando escriba ':[comando]' con espacio", "INFO",usuarioValido.nick,usuarioValido.ipActual)
+                return self.consola.log.agregarLinea(self.consola.onecmd("guardarcmd "+args[0],True)+"\nPara guardar un comando escriba ':[comando]'", "INFO",usuarioValido.nick,usuarioValido.ipActual)
             elif len(args) == 0:
                 self.consola.log.agregarLinea("Usuario solicita desactivar guardado de comando","INFO",usuarioValido.nick,usuarioValido.ipActual)
                 return self.consola.log.agregarLinea(self.consola.onecmd("guardarcmd",True), "INFO",usuarioValido.nick,usuarioValido.ipActual)
@@ -209,7 +209,7 @@ class Servidor(SimpleXMLRPCServer):
                 self.consola.log.agregarLinea("Usuario solicita ejecutar tarea","INFO",usuarioValido.nick,usuarioValido.ipActual)
                 return self.consola.log.agregarLinea(self.consola.onecmd("ejecutartarea",True), "INFO",usuarioValido.nick,usuarioValido.ipActual)
             else:
-                return self.consola.log.agregarLinea("Cantidad de argumentos invalido","ERROR EJECTARTAREA",usuarioValido.nick,usuarioValido.ipActual)
+                return self.consola.log.agregarLinea("Cantidad de argumentos invalido","ERROR EJECUTARTAREA",usuarioValido.nick,usuarioValido.ipActual)
         else:
             return self.consola.log.agregarLinea("Token invalido o expirado","ERROR 401")
 

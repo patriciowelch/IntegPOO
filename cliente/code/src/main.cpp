@@ -97,21 +97,27 @@ private:
         }
         else if (comando == "help" && args.size()==1 && !(find(methods.begin(), methods.end(), args[0]) != methods.end())){
             if(args[0] == "conectar"){
-                cout << "hola" <<endl;
+                cout << "Realizar la conexion con el servidor con usuario y contraseña\n\tSintaxis: conectar" <<endl;
             } else if (args[0] == "listarMetodos"){
-                cout << "hola" <<endl;
-            } else if (args[0] == "enviarArchivo"){
-                cout << "hola" <<endl;
+                cout << "Listar los metodos disponibles en el servidor\n\tSintaxis: listarMetodos" <<endl;
             } else if (args[0] == "help"){
-                cout << "hola" <<endl;
+                cout << "Mostrar la ayuda de los comandos\n\tSintaxis:\thelp [comando] ;muestra la ayuda de un comando" <<endl;
             } else if (args[0] == "quit"){
-                cout << "hola" <<endl;
+                cout << "Salir del programa\n\tSintaxis: quit" <<endl;
             } else {
                 cout << "Metodo no encontrado" << endl;
             }
         }
         else if (comando == "enviarArchivo")
         {
+            if (args.size() != 1)
+            {
+                throw runtime_error("Sintaxis: enviarArchivo <path>");
+            }
+            if (client == nullptr)
+            {
+                throw runtime_error("No se ha conectado al servidor");
+            }
             string path = args[0];
             enviarArchivo(path);
         }

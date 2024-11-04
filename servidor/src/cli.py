@@ -27,7 +27,7 @@ class cli(Cmd):
         try:
             resultado = super().onecmd(linea)
             if resultado is not None:
-                if self.guardar_comandos and self.tarea is not None and not resultado.startswith("╔"):
+                if self.guardar_comandos and self.tarea is not None and not resultado.startswith("$"):
                     resultado = resultado.upper()
                     ultimalinea = self.tarea.agregarLinea(resultado)
                     if retorno:
@@ -215,6 +215,7 @@ Inicializa la ejecucion de la tarea cargada
                         resultado = self.robot.enviar_comando(linea)
                         print(resultado)
                     linea = self.tarea.proximaLinea()
+                return "Tarea ejecutada"
             else:
                 if self.tarea is None:
                     raise Exception("Error: No hay ninguna tarea cargada")
@@ -260,7 +261,7 @@ Inicia o detiene el guardado de comandos
                 if not self.guardar_comandos:
                     self.guardar_comandos = True
                     self.tarea = Tarea(args[0])
-                    return "╔Guardado de comandos activado en %s" % self.tarea._nombre
+                    return "$Guardado de comandos activado en %s" % self.tarea._nombre
             else:
                 raise Exception("Error: Comando invalido inesperado")
         else:
