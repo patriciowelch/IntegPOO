@@ -1,6 +1,9 @@
 import serial
 from log import Log
 import json
+import sounddevice as sd
+import numpy as np
+import time
 
 class Robot():
     def __init__(self, timeout=1,velMax=100):
@@ -91,6 +94,15 @@ class Robot():
         elif arg == 'cerrar':
             return (self.enviar_comando('M3'))
             
+    def sonido(self, arg):
+        if arg == 'conectar':
+            sound = [0.5,550,44100,1,0.2]
+        for i in range(sound[3]):
+            t= np.linspace(0,sound[0],int(sound[2]*sound[0]),endpoint=False)
+            wave = sound[0]*np.sin(2*np.pi*sound[1]*t)
+            sd.play(wave,samplerate=sound[2])
+            sd.wait()
+            time.sleep(sound[4])
         
     def enviar_comando(self, comando):
         if self.serial is None:
