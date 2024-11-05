@@ -1,9 +1,8 @@
+package cliente.code.headers;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.AbstractDocument;
 import javax.swing.filechooser.FileNameExtensionFilter;
-
-import cliente.code.headers.NumericTextFieldFilter;
 
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -392,7 +391,7 @@ public class CustomGUI extends JFrame {
         try {
             // Reemplaza "ruta/a/tu/archivo.exe" con la ruta del archivo .exe de la CLI
             ProcessBuilder processBuilder = new ProcessBuilder(
-                    new File(".").getCanonicalPath() + File.separator + "cliente/code/src/main.exe");
+                    new File(".").getCanonicalPath() + File.separator + "src/main.exe");
             processBuilder.redirectErrorStream(true); // Redirige errores al flujo de salida
 
             // Inicia el proceso

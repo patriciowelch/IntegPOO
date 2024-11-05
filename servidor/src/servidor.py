@@ -1,7 +1,6 @@
 from xmlrpc.server import SimpleXMLRPCServer
 from xmlrpc.server import SimpleXMLRPCRequestHandler
 from threading import Thread
-from log import Log
 import socket
 from clientes import Clientes
 import base64
