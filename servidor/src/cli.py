@@ -41,8 +41,11 @@ class cli(Cmd):
                     if retorno:
                         return resultado
                     else:
-                        print(resultado)
-                        self.log.agregarLinea("Resultado: "+resultado,"INFO")
+                        if resultado.startswith("$"):
+                            print(resultado[1:])
+                        if not resultado.startswith("$"):
+                            print(resultado)
+                            self.log.agregarLinea("Resultado: "+resultado,"INFO")
                     
         except Exception as e:
             if retorno:

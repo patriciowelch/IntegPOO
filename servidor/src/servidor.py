@@ -23,7 +23,7 @@ class Servidor(SimpleXMLRPCServer):
         self.clientes.cargar_clientes()
         self.tokensvalidos = []
 
-        addr = ('192.168.0.117', self.puerto)
+        addr = ('127.0.0.1', self.puerto)
 
         try:
             super().__init__(addr, requestHandler, logRequests, allow_none, encoding, bind_and_activate,
@@ -236,14 +236,14 @@ class Servidor(SimpleXMLRPCServer):
             return self.consola.log.agregarLinea("Token invalido o expirado","ERROR 401")
         
     def _enviarArchivo(self, token, *args):
-        if token not in self.tokensvalidos:
+        if token in self.tokensvalidos:
             usuarioValido = self.clientes.get_usuario_ip_con_token(token)
             self.consola.log.agregarLinea(f"Usuario solicita enviar archivo","INFO",usuarioValido.nick,usuarioValido.ipActual)
-            if len(args) == 1:
-                gcode_content = base64.b64decode(args[0])
-                with open(f"servidor/anexo/Task_Files/{args[0]}.gcode", "wb") as f:
+            if len(args) == 2:
+                gcode_content = base64.b64decode(args[1])
+                with open(f"servidor/anexo/Task_Files/{args[0]}", "wb") as f:
                     f.write(gcode_content)
-                return self.consola.log.agregarLinea(f"Archivo con nombre {args[0]}.gcode recibido con exito","INFO",usuarioValido.nick,usuarioValido.ipActual)
+                return self.consola.log.agregarLinea(f"Archivo con nombre {args[0]} recibido con exito","INFO",usuarioValido.nick,usuarioValido.ipActual)
             else:
                 return self.consola.log.agregarLinea("Cantidad de argumentos invalido","ERROR ENVIARARCHIVO",usuarioValido.nick,usuarioValido.ipActual)
         else:

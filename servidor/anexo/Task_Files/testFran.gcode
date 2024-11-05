@@ -1,6 +1,0 @@
-;Tarea creada
-G28
-M114
-GAY
-NA QUE VER ESTOS COMANDOS
-RE GAY

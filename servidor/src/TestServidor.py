@@ -11,14 +11,14 @@ class TestCLI(unittest.TestCase):
     @patch('cli.Servidor')  # Simula la clase Servidor
     def test_do_servidor_on(self, MockServidor):
         # Simular la creación del servidor
-        self.cli_instance.do_servidor("on")
+        self.cli_instance.do_servidor("on balhou")
         self.assertIsNotNone(self.cli_instance.servidorRpc)  # Asegurarse de que el servidor esté inicializado
     
     @patch('cli.Servidor')
     def test_do_servidor_off(self, MockServidor):
         # Iniciar el servidor primero
         self.cli_instance.servidorRpc = MockServidor()
-        result = self.cli_instance.do_servidor("off")
+        result = self.cli_instance.do_servidor("off balhou")
         self.assertIsNone(self.cli_instance.servidorRpc)  # El servidor debe estar detenido
         self.assertEqual(result, "Servidor detenido")
 

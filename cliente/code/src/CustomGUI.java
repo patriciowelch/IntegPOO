@@ -1,51 +1,97 @@
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import javax.swing.text.AbstractDocument;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import cliente.code.headers.NumericTextFieldFilter;
+
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.*;
 
 public class CustomGUI extends JFrame {
 
+    private JTextArea outputArea;
+    private Process cliProcess;
+    private BufferedWriter cliWriter;
+    private JTextField xField, yField, zField, velField;
+    JTextField pathField;
+
+    // Colores personalizados
+    private Color textColor = Color.WHITE;
+    private Color darkBackground = Color.DARK_GRAY;
+    private Process mainProcess;
+
     public CustomGUI() {
+        iniciarComponentes();
+        iniciarCLI();
+    }
+
+    public void iniciarComponentes() {
         setTitle("Cliente GUI");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 600);
         setLayout(new BorderLayout());
 
-        // Configuración de GridBagConstraints para controlar el tamaño y posición de los paneles
+        // Configuración de GridBagConstraints para controlar el tamaño y posición de
+        // los paneles
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5); // Margen entre componentes
         gbc.fill = GridBagConstraints.BOTH; // Expandir componentes para llenar celdas
 
         // Panel para conexión
         JPanel connectionPanel = new JPanel(new GridLayout(5, 2, 5, 5));
-        connectionPanel.setBorder(BorderFactory.createTitledBorder("Conexión"));
-        connectionPanel.add(new JLabel("IP:"));
+        connectionPanel.setBorder(createTitledBorder("Conexión"));
+        connectionPanel.setBackground(darkBackground);
+
+        JLabel ipLabel = new JLabel("IP:");
+        ipLabel.setForeground(textColor);
+        connectionPanel.add(ipLabel);
         JTextField ipField = new JTextField();
         connectionPanel.add(ipField);
 
-        connectionPanel.add(new JLabel("Puerto:"));
+        JLabel portLabel = new JLabel("Puerto:");
+        portLabel.setForeground(textColor);
+        connectionPanel.add(portLabel);
         JTextField portField = new JTextField();
         connectionPanel.add(portField);
 
-        connectionPanel.add(new JLabel("Usuario:"));
+        JLabel userLabel = new JLabel("Usuario:");
+        userLabel.setForeground(textColor);
+        connectionPanel.add(userLabel);
         JTextField userField = new JTextField();
         connectionPanel.add(userField);
 
-        connectionPanel.add(new JLabel("Contraseña:"));
+        JLabel passwordLabel = new JLabel("Contraseña:");
+        passwordLabel.setForeground(textColor);
+        connectionPanel.add(passwordLabel);
         JPasswordField passwordField = new JPasswordField();
         connectionPanel.add(passwordField);
         connectionPanel.add(new JLabel());
 
         JButton connectButton = new JButton("Conectar");
+        connectButton.addActionListener(_ -> conectar(ipField.getText(), portField.getText(), userField.getText(),
+                new String(passwordField.getPassword())));
         connectionPanel.add(connectButton);
 
         // Panel de control del robot
         JPanel robotPanel = new JPanel(new GridLayout(3, 2, 5, 5));
-        robotPanel.setBorder(BorderFactory.createTitledBorder("Robot"));
+        robotPanel.setBorder(createTitledBorder("Robot"));
+        robotPanel.setBackground(darkBackground);
+
         JButton connectRobotBtn = new JButton("Conectar");
+        connectRobotBtn.addActionListener(_ -> conectarRobot());
         JButton disconnectRobotBtn = new JButton("Desconectar");
+        disconnectRobotBtn.addActionListener(_ -> desconectarRobot());
         JButton motorsOnBtn = new JButton("Encender Motores");
+        motorsOnBtn.addActionListener(_ -> encenderMotores());
         JButton motorsOffBtn = new JButton("Apagar Motores");
+        motorsOffBtn.addActionListener(_ -> apagarMotores());
         JButton getStateBtn = new JButton("Obtener Estado");
+        getStateBtn.addActionListener(_ -> obtenerEstado());
         JButton doHomeButton = new JButton("Home");
+        doHomeButton.addActionListener(_ -> moverHome());
 
         robotPanel.add(connectRobotBtn);
         robotPanel.add(disconnectRobotBtn);
@@ -56,77 +102,119 @@ public class CustomGUI extends JFrame {
 
         // Panel de movimientos
         JPanel movlinPanel = new JPanel(new FlowLayout());
-        movlinPanel.setBorder(BorderFactory.createTitledBorder("MovLin"));
-        movlinPanel.add(new JLabel("X:"));
-        JTextField xField = new JTextField(5);
+        movlinPanel.setBorder(createTitledBorder("MovLin"));
+        movlinPanel.setBackground(darkBackground);
+
+        xField = new JTextField(5);
+        ((AbstractDocument) xField.getDocument()).setDocumentFilter(new NumericTextFieldFilter());
         movlinPanel.add(xField);
 
-        movlinPanel.add(new JLabel("Y:"));
-        JTextField yField = new JTextField(5);
+        yField = new JTextField(5);
+        ((AbstractDocument) yField.getDocument()).setDocumentFilter(new NumericTextFieldFilter());
         movlinPanel.add(yField);
 
-        movlinPanel.add(new JLabel("Z:"));
-        JTextField zField = new JTextField(5);
+        zField = new JTextField(5);
+        ((AbstractDocument) zField.getDocument()).setDocumentFilter(new NumericTextFieldFilter());
         movlinPanel.add(zField);
 
-        movlinPanel.add(new JLabel("Vel:"));
-        JTextField velField = new JTextField(5);
+        velField = new JTextField(5);
+        ((AbstractDocument) velField.getDocument()).setDocumentFilter(new NumericTextFieldFilter());
         movlinPanel.add(velField);
 
         JButton sendMoveBtn = new JButton("Enviar");
+        sendMoveBtn.addActionListener(
+                _ -> enviarMovimiento(xField.getText(), yField.getText(), zField.getText(), velField.getText()));
         movlinPanel.add(sendMoveBtn);
 
         // Panel de efector final
         JPanel efectorPanel = new JPanel(new GridLayout(1, 2, 5, 5));
-        efectorPanel.setBorder(BorderFactory.createTitledBorder("Efector Final"));
+        efectorPanel.setBorder(createTitledBorder("Efector Final"));
+        efectorPanel.setBackground(darkBackground);
+
         JButton openGripperBtn = new JButton("Abrir");
+        openGripperBtn.addActionListener(_ -> abrirEfector());
         JButton closeGripperBtn = new JButton("Cerrar");
+        closeGripperBtn.addActionListener(_ -> cerrarEfector());
         efectorPanel.add(openGripperBtn);
         efectorPanel.add(closeGripperBtn);
 
         // Panel para enviar archivos
         JPanel filePanel = new JPanel(new FlowLayout());
-        filePanel.setBorder(BorderFactory.createTitledBorder("Enviar Archivo"));
-        JTextField pathField = new JTextField(15);
+        filePanel.setBorder(createTitledBorder("Enviar Archivo"));
+        filePanel.setBackground(darkBackground);
+
+        pathField = new JTextField(15);
         JButton selectFileBtn = new JButton("...");
+        selectFileBtn.addActionListener(_ -> seleccionarArchivo());
         JButton sendFileBtn = new JButton("Enviar Archivo");
+        sendFileBtn.addActionListener(_ -> enviarArchivo(pathField.getText()));
         filePanel.add(pathField);
         filePanel.add(selectFileBtn);
         filePanel.add(sendFileBtn);
 
         // Área de salida de texto
-        JTextArea outputArea = new JTextArea(10, 50);
+        outputArea = new JTextArea(10, 50);
         outputArea.setEditable(false);
+        outputArea.setBackground(darkBackground);
+        outputArea.setForeground(textColor);
         JScrollPane outputScrollPane = new JScrollPane(outputArea);
+        outputArea.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                scrollToBottom();
+            }
 
-        // Panel de seleccion de modo
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                scrollToBottom();
+            }
+
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                scrollToBottom();
+            }
+
+            private void scrollToBottom() {
+                outputArea.setCaretPosition(outputArea.getDocument().getLength());
+            }
+        });
+
+        // Panel de selección de modo
         JPanel selectModePanel = new JPanel(new GridLayout(1, 2, 5, 5));
-        selectModePanel.setBorder(BorderFactory.createTitledBorder("Seleccionar Modo"));
+        selectModePanel.setBorder(createTitledBorder("Seleccionar Modo"));
+        selectModePanel.setBackground(darkBackground);
+
         JButton absoluteModeBtn = new JButton("Modo Absoluto");
+        absoluteModeBtn.addActionListener(_ -> cambiarAModoAbsoluto());
         JButton relativeModeBtn = new JButton("Modo Relativo");
+        relativeModeBtn.addActionListener(_ -> cambiarAModoRelativo());
         selectModePanel.add(absoluteModeBtn);
         selectModePanel.add(relativeModeBtn);
 
-        // Panel de ejecucion de archivos
+        // Panel de ejecución de archivos
         JPanel execModePanel = new JPanel(new FlowLayout());
-        execModePanel.setBorder(BorderFactory.createTitledBorder("Cargar/Ejecutar Tarea"));
-        //text input para nombre de archivo
+        execModePanel.setBorder(createTitledBorder("Cargar/Ejecutar Tarea"));
+        execModePanel.setBackground(darkBackground);
+
         JTextField taskField = new JTextField(15);
         JButton loadTaskBtn = new JButton("Cargar");
+        loadTaskBtn.addActionListener(_ -> cargarArchivo(taskField.getText()));
         JButton execTaskBtn = new JButton("Ejecutar");
+        execTaskBtn.addActionListener(_ -> ejecutarArchivo());
         execModePanel.add(taskField);
         execModePanel.add(loadTaskBtn);
         execModePanel.add(execTaskBtn);
 
         // Organizar los paneles en un layout de GridBagLayout
         JPanel mainPanel = new JPanel(new GridBagLayout());
+        mainPanel.setBackground(darkBackground);
 
         // Añadir el panel de conexión en 0,0 y 0,1
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridheight = 2; // Ocupa dos filas
         gbc.weightx = 1;
-        gbc.weighty = 0.2;
+        gbc.weighty = 0.15;
         mainPanel.add(connectionPanel, gbc);
 
         // Añadir el panel MovLin en 0,2
@@ -165,10 +253,209 @@ public class CustomGUI extends JFrame {
         gbc.gridx = 0;
         gbc.gridy = 4;
         gbc.gridwidth = 2; // Ocupa dos columnas
-        gbc.weighty = 0.4;
+        gbc.weighty = 0.6;
         mainPanel.add(outputScrollPane, gbc);
 
         add(mainPanel, BorderLayout.CENTER);
+
+        // Aplicar color de fondo general a la ventana principal
+        getContentPane().setBackground(darkBackground);
+
+        // Añadir un WindowListener para cerrar el proceso main.exe cuando se cierre la ventana
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if (mainProcess != null) {
+                    mainProcess.destroy();
+                }
+            }
+        });
+    }
+
+    private void iniciarCLI() {
+        try {
+            // Reemplaza "ruta/a/tu/archivo.exe" con la ruta del archivo .exe de la CLI
+            System.out.println(new File(".").getCanonicalPath());
+            ProcessBuilder processBuilder = new ProcessBuilder(
+                    new File(".").getCanonicalPath() + File.separator + "main.exe");
+            processBuilder.redirectErrorStream(true); // Redirige errores al flujo de salida
+
+            // Inicia el proceso
+            cliProcess = processBuilder.start();
+
+            // Configura los streams para leer y escribir en la CLI
+            cliWriter = new BufferedWriter(new OutputStreamWriter(cliProcess.getOutputStream()));
+            BufferedReader cliReader = new BufferedReader(new InputStreamReader(cliProcess.getInputStream()));
+
+            // Hilo para leer la salida de la CLI y mostrarla en la interfaz
+            new Thread(() -> {
+                String line;
+                try {
+                    while ((line = cliReader.readLine()) != null) {
+                        outputArea.append(line + "\n");
+                    }
+                } catch (IOException e) {
+                    outputArea.append("Error leyendo salida de la CLI.\n");
+                }
+            }).start();
+
+            outputArea.append("CLI iniciada exitosamente.\n");
+        } catch (IOException e) {
+            outputArea.append("Error al iniciar la CLI.\n");
+        }
+    }
+
+    /**
+     * Método para enviar comandos a la CLI
+     */
+    private void enviarComandoCLI(String comando) {
+        try {
+            if (cliWriter != null) {
+                cliWriter.write(comando);
+                cliWriter.newLine();
+                cliWriter.flush();
+            } else {
+                outputArea.append("CLI no está disponible.\n");
+            }
+        } catch (IOException e) {
+            outputArea.append("Error al enviar comando a la CLI.\n");
+        }
+    }
+
+    private void conectar(String ip, String port, String user, String password) {
+        if (ip.isEmpty() || port.isEmpty() || user.isEmpty() || password.isEmpty()) {
+            outputArea.append("Por favor, complete todos los campos.\n");
+            return;
+        } else {
+            outputArea.append("Conectando a " + ip + ":" + port + " como " + user + "\n");
+            enviarComandoCLI("conectar");
+            enviarComandoCLI(user);
+            enviarComandoCLI(password);
+            enviarComandoCLI(ip);
+            enviarComandoCLI(port);
+        }
+    }
+
+    private void conectarRobot() {
+        outputArea.append("Conectando al robot...\n");
+        enviarComandoCLI("robot conectar");
+    }
+
+    private void desconectarRobot() {
+        outputArea.append("Desconectando del robot...\n");
+        enviarComandoCLI("robot desconectar");
+    }
+
+    private void encenderMotores() {
+        outputArea.append("Encendiendo motores...\n");
+        enviarComandoCLI("robot motores_on");
+    }
+
+    private void apagarMotores() {
+        outputArea.append("Apagando motores...\n");
+        enviarComandoCLI("robot motores_off");
+    }
+
+    private void obtenerEstado() {
+        outputArea.append("Obteniendo estado del robot...\n");
+        enviarComandoCLI("robot estado");
+    }
+
+    private void moverHome() {
+        outputArea.append("Moviendo a posición home...\n");
+        enviarComandoCLI("home");
+    }
+
+    private void enviarMovimiento(String x, String y, String z, String vel) {
+        if (x.isEmpty() || y.isEmpty() || z.isEmpty()) {
+            outputArea.append("Por favor, complete todos los campos, al menos x y z.\n");
+            return;
+        } else if (vel.isEmpty()) {
+            outputArea.append("Moviendo a X: " + x + ", Y: " + y + ", Z: " + z + "\n");
+            enviarComandoCLI("movlin " + x + " " + y + " " + z);
+        } else {
+            outputArea.append("Moviendo a X: " + x + ", Y: " + y + ", Z: " + z + " con velocidad: " + vel + "\n");
+            enviarComandoCLI("movlin " + x + " " + y + " " + z + " " + vel);
+        }
+        xField.setText("");
+        yField.setText("");
+        zField.setText("");
+        velField.setText("");
+    }
+
+    private void abrirEfector() {
+        outputArea.append("Abriendo efector final...\n");
+        enviarComandoCLI("efectorfinal abrir");
+    }
+
+    private void cerrarEfector() {
+        outputArea.append("Cerrando efector final...\n");
+        enviarComandoCLI("efectorfinal cerrar");
+    }
+
+    private void cambiarAModoAbsoluto() {
+        outputArea.append("Cambiando a modo absoluto...\n");
+        enviarComandoCLI("modo abs");
+    }
+
+    private void cambiarAModoRelativo() {
+        outputArea.append("Cambiando a modo relativo...\n");
+        enviarComandoCLI("modo rel");
+    }
+
+    private void seleccionarArchivo() {
+        JFileChooser fileChooser = new JFileChooser();
+    
+        // Filtra los tipos de archivo, por ejemplo, solo archivos .txt y .csv
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Archivos GCODE", "gcode");
+        fileChooser.setFileFilter(filter);
+        
+        // Abre el diálogo de selección de archivos
+        int result = fileChooser.showOpenDialog(this);
+        
+        if (result == JFileChooser.APPROVE_OPTION) {
+            // Obtiene el archivo seleccionado
+            java.io.File selectedFile = fileChooser.getSelectedFile();
+            String filePath = selectedFile.getAbsolutePath();
+            
+            // Muestra la ruta del archivo en el área de salida
+            outputArea.append("Archivo seleccionado: " + filePath + "\n");
+            pathField.setText(filePath);
+        } else {
+            outputArea.append("Selección de archivo cancelada.\n");
+        }
+    }
+
+    private void enviarArchivo(String path) {
+        if(path.isEmpty()) {
+            outputArea.append("Por favor, seleccione un archivo.\n");
+            return;
+        } else {
+            outputArea.append("Enviando archivo: " + path + "\n");
+            enviarComandoCLI("enviarArchivo " + path);
+        }
+    }
+
+    private void cargarArchivo(String path) {
+        if(path.isEmpty()) {
+            outputArea.append("Por favor, seleccione un archivo.\n");
+            return;
+        } else {
+            outputArea.append("Cargando archivo: " + path + "\n");
+            enviarComandoCLI("cargartarea " + path);
+        }
+    }
+
+    private void ejecutarArchivo() {
+        outputArea.append("Ejecutando tarea...\n");
+        enviarComandoCLI("ejecutartarea");
+    }
+
+    // Método para crear un borde con título en color blanco
+    private TitledBorder createTitledBorder(String title) {
+        TitledBorder border = BorderFactory.createTitledBorder(title);
+        border.setTitleColor(textColor); // Establece el color del título a blanco
+        return border;
     }
 
     public static void main(String[] args) {
