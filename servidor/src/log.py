@@ -22,12 +22,8 @@ class Log():
         ## Agrega una linea al log con el siguiente formato "Fecha Hora Tipo: linea"
         try:
             with open(f"{self.path}\\{self.nombre}.txt", "a") as f:
-                if linea[-1] == '\n':
-                    linea = linea[:-1]
-                if linea[-1] == '\r':
-                    linea = linea[:-1]
-                if linea[-1] == '\n':
-                    linea = linea[:-1]
+                linea = linea.replace("\r","")
+                linea = linea.replace("\n","")
                 linea = linea.replace("\n","\t|\t")
                 #Si encuentra la palabra error en la linea, el tipo cambia a ERROR
                 log = f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S') } {tipo}"
@@ -53,9 +49,9 @@ class Log():
                 lineas = f.readlines()
                 f.close()
             if ultimasLineas > len(lineas):
-                return "$"+''.join(lineas).strip() #Si se pide mas lineas de las que hay, devuelve todas
+                return "$"+''.join(lineas) #Si se pide mas lineas de las que hay, devuelve todas
             else:
-                return "$"+''.join(lineas[-ultimasLineas:]).strip()
+                return "$"+''.join(lineas[-ultimasLineas:])
         except Exception as e:
             print(f"Error inesperado: {e}")
             return None
