@@ -1,0 +1,9 @@
+Log creado: 2024-11-05 17:10:28 
+2024-11-05 17:11:24 INFO: Conectando al puerto com4...
+2024-11-05 17:11:24 INFO: Error: No se pudo conectar al puerto com4.
+2024-11-05 17:11:37 INFO: Puerto cambiado a com5
+2024-11-05 17:11:45 INFO: Conectando al puerto com5...
+2024-11-05 17:11:47 INFO MENSAJE DEVUELTO: ROBOT ONLINE
+2024-11-05 17:11:47 INFO MENSAJE DEVUELTO: SEND G28 TO CALIBRATE
+2024-11-05 17:11:49 INFO: Desconectando del puerto com5...
+2024-11-05 17:11:49 INFO: Desconectado del puerto com5.
