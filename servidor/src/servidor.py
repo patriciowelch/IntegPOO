@@ -1,7 +1,6 @@
 from xmlrpc.server import SimpleXMLRPCServer
 from xmlrpc.server import SimpleXMLRPCRequestHandler
 from threading import Thread
-from log import Log
 import socket
 from clientes import Clientes
 import base64
@@ -46,6 +45,7 @@ class Servidor(SimpleXMLRPCServer):
         self.register_function(self._defguardar, ':')
         self.register_function(self._help, 'help')
         self.register_function(self._enviarArchivo, 'enviarArchivo')
+        self.register_function(self._log, 'log')
 
         self.hiloRPC = Thread(target = self.correrServidor, daemon = True)
         self.hiloRPC.start()
@@ -246,5 +246,16 @@ class Servidor(SimpleXMLRPCServer):
                 return self.consola.log.agregarLinea(f"Archivo con nombre {args[0]} recibido con exito","INFO",usuarioValido.nick,usuarioValido.ipActual)
             else:
                 return self.consola.log.agregarLinea("Cantidad de argumentos invalido","ERROR ENVIARARCHIVO",usuarioValido.nick,usuarioValido.ipActual)
+        else:
+            return self.consola.log.agregarLinea("Token invalido o expirado","ERROR 401")
+        
+    def _log(self, token, *args):
+        if token in self.tokensvalidos:
+            usuarioValido = self.clientes.get_usuario_ip_con_token(token)
+            if len(args) == 0:
+                self.consola.log.agregarLinea("Usuario solicita ver el log","INFO",usuarioValido.nick,usuarioValido.ipActual)
+                return self.consola.onecmd("log 20",True)
+            else:
+                return self.consola.log.agregarLinea("Cantidad de argumentos invalido","ERROR LOG",usuarioValido.nick,usuarioValido.ipActual)
         else:
             return self.consola.log.agregarLinea("Token invalido o expirado","ERROR 401")

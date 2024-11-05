@@ -1,14 +1,15 @@
+package cliente.code.headers;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.AbstractDocument;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import cliente.code.headers.NumericTextFieldFilter;
-
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.*;
+import java.awt.event.FocusListener;
+import java.awt.event.FocusEvent;
 
 public class CustomGUI extends JFrame {
 
@@ -16,7 +17,9 @@ public class CustomGUI extends JFrame {
     private Process cliProcess;
     private BufferedWriter cliWriter;
     private JTextField xField, yField, zField, velField;
-    JTextField pathField;
+    private JTextField pathField;
+    private JTextField commandToSave;
+    private JTextField nameFile;
 
     // Colores personalizados
     private Color textColor = Color.WHITE;
@@ -101,9 +104,29 @@ public class CustomGUI extends JFrame {
         robotPanel.add(doHomeButton);
 
         // Panel de movimientos
-        JPanel movlinPanel = new JPanel(new FlowLayout());
+        JPanel movlinPanel = new JPanel(new GridLayout(2, 5, 5, 5));
         movlinPanel.setBorder(createTitledBorder("MovLin"));
         movlinPanel.setBackground(darkBackground);
+
+        JLabel xLabel = new JLabel("X:");
+        xLabel.setForeground(textColor);
+        movlinPanel.add(xLabel);
+
+        JLabel yLabel = new JLabel("Y:");
+        yLabel.setForeground(textColor);
+        movlinPanel.add(yLabel);
+
+        JLabel zLabel = new JLabel("Z:");
+        zLabel.setForeground(textColor);
+        movlinPanel.add(zLabel);
+
+        JLabel velLabel = new JLabel("Velocidad:");
+        velLabel.setForeground(textColor);
+        movlinPanel.add(velLabel);
+
+        JLabel emptyLabel = new JLabel();
+        movlinPanel.add(emptyLabel);
+        movlinPanel.add(emptyLabel);
 
         xField = new JTextField(5);
         ((AbstractDocument) xField.getDocument()).setDocumentFilter(new NumericTextFieldFilter());
@@ -144,6 +167,23 @@ public class CustomGUI extends JFrame {
         filePanel.setBackground(darkBackground);
 
         pathField = new JTextField(15);
+        //agregar hint al campo de texto
+        pathField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (pathField.getText().equals("Ruta del archivo")) {
+                    pathField.setText("");
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (pathField.getText().isEmpty()) {
+                    pathField.setText("Ruta del archivo");
+                }
+            }
+        });
+        pathField.setText("Ruta del archivo");
         JButton selectFileBtn = new JButton("...");
         selectFileBtn.addActionListener(_ -> seleccionarArchivo());
         JButton sendFileBtn = new JButton("Enviar Archivo");
@@ -197,6 +237,22 @@ public class CustomGUI extends JFrame {
         execModePanel.setBackground(darkBackground);
 
         JTextField taskField = new JTextField(15);
+        taskField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (taskField.getText().equals("Nombre del archivo")) {
+                    taskField.setText("");
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (taskField.getText().isEmpty()) {
+                    taskField.setText("Nombre del archivo");
+                }
+            }
+        });
+        taskField.setText("Nombre del archivo");
         JButton loadTaskBtn = new JButton("Cargar");
         loadTaskBtn.addActionListener(_ -> cargarArchivo(taskField.getText()));
         JButton execTaskBtn = new JButton("Ejecutar");
@@ -205,6 +261,60 @@ public class CustomGUI extends JFrame {
         execModePanel.add(loadTaskBtn);
         execModePanel.add(execTaskBtn);
 
+        // Panel para guardar comandos en un archivo
+        JPanel saveAndLog = new JPanel(new GridLayout(2, 3, 5, 5));
+        saveAndLog.setBorder(createTitledBorder("Guardar Comandos"));
+        saveAndLog.setBackground(darkBackground);
+
+        nameFile = new JTextField(15);
+        nameFile.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (nameFile.getText().equals("Nombre del archivo")) {
+                    nameFile.setText("");
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (nameFile.getText().isEmpty()) {
+                    nameFile.setText("Nombre del archivo");
+                }
+            }
+        });
+        nameFile.setText("Nombre del archivo");
+        commandToSave = new JTextField(15);
+        commandToSave.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (commandToSave.getText().equals("Comando a guardar")) {
+                    commandToSave.setText("");
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (commandToSave.getText().isEmpty()) {
+                    commandToSave.setText("Comando a guardar");
+                }
+            }
+        });
+        commandToSave.setText("Comando a guardar");
+        JButton saveCommandsBtn = new JButton("Iniciar Guardado");
+        JButton stopSaveCommandsBtn = new JButton("Detener Guardado");
+        JButton logCommandsBtn = new JButton("Log Comandos");
+        JButton enviarComandosBtn = new JButton("Enviar Comandos");
+        saveAndLog.add(nameFile);
+        saveAndLog.add(saveCommandsBtn);
+        saveAndLog.add(stopSaveCommandsBtn);
+        saveAndLog.add(commandToSave);
+        saveAndLog.add(enviarComandosBtn);
+        saveAndLog.add(logCommandsBtn);
+        saveCommandsBtn.addActionListener(_ -> iniciarGuardarCMD(nameFile.getText()));
+        stopSaveCommandsBtn.addActionListener(_ -> detenerGuardarCMD());
+        logCommandsBtn.addActionListener(_ -> logComandos());
+        enviarComandosBtn.addActionListener(_ -> enviarComandos(commandToSave.getText()));
+
         // Organizar los paneles en un layout de GridBagLayout
         JPanel mainPanel = new JPanel(new GridBagLayout());
         mainPanel.setBackground(darkBackground);
@@ -212,20 +322,20 @@ public class CustomGUI extends JFrame {
         // Añadir el panel de conexión en 0,0 y 0,1
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.gridheight = 2; // Ocupa dos filas
+        gbc.gridheight = 3; // Ocupa dos filas
         gbc.weightx = 1;
         gbc.weighty = 0.15;
         mainPanel.add(connectionPanel, gbc);
 
         // Añadir el panel MovLin en 0,2
         gbc.gridx = 0;
-        gbc.gridy = 2;
+        gbc.gridy = 3;
         gbc.gridheight = 1; // Ocupa una fila
         mainPanel.add(movlinPanel, gbc);
 
         // Añadir el panel de enviar archivo en 0,3
         gbc.gridx = 0;
-        gbc.gridy = 3;
+        gbc.gridy = 4;
         mainPanel.add(filePanel, gbc);
 
         // Añadir el panel del robot en 1,0
@@ -249,9 +359,14 @@ public class CustomGUI extends JFrame {
         gbc.gridy = 3;
         mainPanel.add(execModePanel, gbc);
 
+        // Añadir el panel adicional 3 en 1,4
+        gbc.gridx = 1;
+        gbc.gridy = 4;
+        mainPanel.add(saveAndLog, gbc);
+
         // Añadir el área de salida de texto en la parte inferior
         gbc.gridx = 0;
-        gbc.gridy = 4;
+        gbc.gridy = 5;
         gbc.gridwidth = 2; // Ocupa dos columnas
         gbc.weighty = 0.6;
         mainPanel.add(outputScrollPane, gbc);
@@ -275,9 +390,8 @@ public class CustomGUI extends JFrame {
     private void iniciarCLI() {
         try {
             // Reemplaza "ruta/a/tu/archivo.exe" con la ruta del archivo .exe de la CLI
-            System.out.println(new File(".").getCanonicalPath());
             ProcessBuilder processBuilder = new ProcessBuilder(
-                    new File(".").getCanonicalPath() + File.separator + "main.exe");
+                    new File(".").getCanonicalPath() + File.separator + "src/main.exe");
             processBuilder.redirectErrorStream(true); // Redirige errores al flujo de salida
 
             // Inicia el proceso
@@ -427,7 +541,7 @@ public class CustomGUI extends JFrame {
     }
 
     private void enviarArchivo(String path) {
-        if(path.isEmpty()) {
+        if(path.isEmpty() || path.equals("Ruta del archivo")) {
             outputArea.append("Por favor, seleccione un archivo.\n");
             return;
         } else {
@@ -437,7 +551,7 @@ public class CustomGUI extends JFrame {
     }
 
     private void cargarArchivo(String path) {
-        if(path.isEmpty()) {
+        if(path.isEmpty() || path.equals("Nombre del archivo")) {
             outputArea.append("Por favor, seleccione un archivo.\n");
             return;
         } else {
@@ -449,6 +563,37 @@ public class CustomGUI extends JFrame {
     private void ejecutarArchivo() {
         outputArea.append("Ejecutando tarea...\n");
         enviarComandoCLI("ejecutartarea");
+    }
+
+    private void iniciarGuardarCMD(String nombreArchivo) {
+        if(nombreArchivo.isEmpty() || nombreArchivo.equals("Nombre del archivo")) {
+            outputArea.append("Por favor, ingrese un nombre de archivo.\n");
+            return;
+        } else {
+            outputArea.append("Iniciando guardado de comandos en " + nombreArchivo + ".gcode\n");
+            enviarComandoCLI("guardarcmd " + nombreArchivo);
+        }
+    }
+
+    private void detenerGuardarCMD() {
+        outputArea.append("Deteniendo guardado de comandos...\n");
+        enviarComandoCLI("guardarcmd");
+    }
+
+    private void logComandos() {
+        outputArea.append("Solicitando log de comandos...\n");
+        enviarComandoCLI("log");
+    }
+
+    private void enviarComandos(String comandos) {
+        if(comandos.isEmpty() || comandos.equals("Comando a guardar")) {
+            outputArea.append("Por favor, ingrese un comando.\n");
+            return;
+        } else {
+            outputArea.append("Enviando comando "+ comandos +"\n");
+            enviarComandoCLI(":"+comandos);
+            commandToSave.setText("Comando a guardar");
+        }
     }
 
     // Método para crear un borde con título en color blanco
