@@ -7,18 +7,17 @@ import threading
 
 class Robot():
     def __init__(self, timeout=1,velMax=100):
-        self.path = "servidor/anexo/serialConfig.json"
+        self.path = "servidor/anexo/config.json"
         with open(self.path) as file:
             data = json.load(file)
-            self._puerto = data["puerto"]
-            self._baudrate = data["baudrate"]
+            self._puerto = data["robot"]["puerto"]
+            self._baudrate = data["robot"]["baudrate"]
         self._timeout = timeout
         self._velMax = velMax
         self.serial = None
         self.motor = False
         self.sound_thread = None
         self.log = Log("Log_Robot")
-        pass
 
     def addToLog (self, mensaje):
         # Si la primera palabra del mensaje es "Error", se agrega al log como error, eliminando la palabra ERROR, si no es un error se agrega como info

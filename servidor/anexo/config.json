@@ -1,0 +1,10 @@
+{
+    "robot":{
+        "puerto": "com5",
+        "baudrate": "115200"
+    },
+    "servidor":{
+        "ip": "127.0.0.1",
+        "puerto": 8000
+    }
+}

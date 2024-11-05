@@ -4,6 +4,7 @@ from threading import Thread
 import socket
 from clientes import Clientes
 import base64
+import json
 
 class Handler(SimpleXMLRPCRequestHandler):
     def __init__(self, request, client_address, server):
@@ -21,15 +22,24 @@ class Servidor(SimpleXMLRPCServer):
         self.clientes = Clientes()
         self.clientes.cargar_clientes()
         self.tokensvalidos = []
-
-        addr = ('127.0.0.1', self.puerto)
+        with open("servidor/anexo/config.json") as f:
+            config = json.load(f)
+            ipaddr = config["servidor"]["ip"]
+            if self.puerto != config["servidor"]["puerto"]:
+                self.puerto = config["servidor"]["puerto"]
+        addr = (ipaddr, self.puerto)
 
         try:
             super().__init__(addr, requestHandler, logRequests, allow_none, encoding, bind_and_activate,
                              use_builtin_types)
             
         except socket.error as e:
-            print(self.consola.log.agregarLinea(e,"ERROR"))
+            if e.errno == 98:
+                raise Exception(self.consola.log.agregarLinea("Error al iniciar servidor RPC: Puerto en uso","ERROR"))
+            elif e.errno == 11001:
+                raise Exception(self.consola.log.agregarLinea("Error al iniciar servidor RPC: No se pudo resolver la direccion ip","ERROR"))
+            else:
+                raise Exception(self.consola.log.agregarLinea(e,"ERROR"))
 
         #aca se agregan los metodos que son accesibles al cliente
         self.register_function(self._iniciar_sesion, 'iniciar_sesion')
