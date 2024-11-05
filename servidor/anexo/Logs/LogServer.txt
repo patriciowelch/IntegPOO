@@ -1,0 +1,22 @@
+Log creado: 2024-11-05 17:10:28 
+2024-11-05 17:10:38 INFO: Comando Ingresado Local: servidor on balhou
+2024-11-05 17:10:38 INFO: Servidor RPC iniciado en el puerto [('127.0.0.1', 8000)]
+2024-11-05 17:10:38 INFO: Resultado: Servidor iniciado
+2024-11-05 17:11:23 INFO IP: 127.0.0.1 USER: pato : Usuario: pato intenta iniciar sesion
+2024-11-05 17:11:23 INFO IP: 127.0.0.1 USER: pato : Sesion de pato iniciada con exito
+2024-11-05 17:11:23 INFO IP: 127.0.0.1 USER: pato : Usuario solicita listar los metodos disponibles
+2024-11-05 17:11:24 INFO IP: 127.0.0.1 USER: pato : Usuario solicita enviar el comando 'conectar' al robot
+2024-11-05 17:11:24 INFO IP: 127.0.0.1 USER: pato : Error: No se pudo conectar al puerto com4.
+2024-11-05 17:11:37 INFO: Comando Ingresado Local: robot puerto com5 balhou
+2024-11-05 17:11:37 INFO: Resultado: Puerto cambiado a com5
+2024-11-05 17:11:39 INFO IP: 127.0.0.1 USER: pato : Usuario: pato intenta iniciar sesion
+2024-11-05 17:11:39 INFO IP: 127.0.0.1 USER: pato : Sesion de pato iniciada con exito
+2024-11-05 17:11:39 INFO IP: 127.0.0.1 USER: pato : Usuario solicita listar los metodos disponibles
+2024-11-05 17:11:45 INFO IP: 127.0.0.1 USER: pato : Usuario solicita enviar el comando 'conectar' al robot
+2024-11-05 17:11:48 INFO IP: 127.0.0.1 USER: pato : INFO: ROBOT ONLINEINFO: SEND G28 TO CALIBRATE
+2024-11-05 17:11:49 INFO IP: 127.0.0.1 USER: pato : Usuario solicita enviar el comando 'desconectar' al robot
+2024-11-05 17:11:49 INFO IP: 127.0.0.1 USER: pato : Desconectado
+2024-11-05 17:11:53 INFO IP: 127.0.0.1 USER: pato : Usuario solicita ver el log
+2024-11-05 17:12:53 INFO IP: 127.0.0.1 USER: pato : Usuario: pato intenta iniciar sesion
+2024-11-05 17:12:53 INFO IP: 127.0.0.1 USER: pato : Sesion de pato iniciada con exito
+2024-11-05 17:12:53 INFO IP: 127.0.0.1 USER: pato : Usuario solicita listar los metodos disponibles
