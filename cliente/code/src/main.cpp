@@ -244,6 +244,7 @@ private:
         {
             throw std::runtime_error("Error al abrir el archivo");
         }
+        string name = path.substr(path.find_last_of("/\\") + 1);
 
         // Leer el archivo en un string
         std::ostringstream oss;
@@ -267,7 +268,8 @@ private:
 
         XmlRpcValue Args, result;
         Args[0] = token;
-        Args[1] = encoded;
+        Args[1] = name;
+        Args[2] = encoded;
         if (client->execute("enviarArchivo", Args, result))
         {
             cout << static_cast<string>(result) << endl;
