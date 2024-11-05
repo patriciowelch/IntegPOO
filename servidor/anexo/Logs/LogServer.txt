@@ -1,15 +1,9 @@
-Log creado: 2024-11-03 14:24:20 
-2024-11-03 14:24:20 INFO: Servidor RPC iniciado en el puerto [('127.0.0.1', 8000)]
-2024-11-03 14:24:27 INFO: Usuario: pato intenta iniciar sesion
-2024-11-03 14:24:27 INFO: Sesion de pato iniciada con exito
-2024-11-03 14:24:27 INFO: Usuario solicita listar los metodos disponibles
-2024-11-03 14:24:30 INFO: Usuario solicita enviar el comando 'conectar' al robot
-2024-11-03 14:24:32 INFO: INFO: ROBOT ONLINE
-INFO: SEND G28 TO CALIBRATE
-
-2024-11-03 14:24:39 INFO: Usuario solicita moverse a la posicion '100' '100' '100'
-2024-11-03 14:24:40 INFO: INFO: LINEAR MOVE: [X:100.00 Y:100.00 Z:100.00 E:0.00] t=0.81s
-
-2024-11-03 14:26:39 INFO: Usuario solicita enviar el comando 'desconectar' al robot
-2024-11-03 14:26:39 INFO: Desconectado
-2024-11-03 14:26:49 INFO: Usuario solicita moverse a la posicion '100' '100' '100'
+Log creado: 2024-11-04 18:47:19 
+2024-11-04 18:47:28 INFO: Comando Ingresado Local: servidor on
+2024-11-04 18:47:28 ERROR: Error: Cantidad de Argumentos Incorrecta
+2024-11-04 18:47:36 INFO: Comando Ingresado Local: servidor on balhou
+2024-11-04 18:47:36 INFO: Servidor RPC iniciado en el puerto [('192.168.0.117', 8000)]
+2024-11-04 18:47:36 INFO: Resultado: Servidor iniciado
+2024-11-04 18:47:43 INFO: Comando Ingresado Local: quit
+2024-11-04 18:47:43 INFO: Servidor detenido
+2024-11-04 18:47:43 INFO: Saliendo...

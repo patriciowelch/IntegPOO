@@ -14,7 +14,7 @@ class cli(Cmd):
         self.intro = 'Bienvenido'
         self.servidorRpc = None
         self.guardar_comandos = False
-        self.robot = Robot('COM5')
+        self.robot = Robot()
         self.tarea = None
         self.modorobot = 'MAN'
         self.log = Log("LogServer")
@@ -25,28 +25,34 @@ class cli(Cmd):
     
     def onecmd(self, linea, retorno = False):
         try:
+            if not retorno:
+                self.log.agregarLinea("Comando Ingresado Local: "+linea,"INFO")
             resultado = super().onecmd(linea)
             if resultado is not None:
-                if self.guardar_comandos and self.tarea is not None and not resultado.startswith("╔"):
+                if self.guardar_comandos and self.tarea is not None and not resultado.startswith("$"):
                     resultado = resultado.upper()
                     ultimalinea = self.tarea.agregarLinea(resultado)
                     if retorno:
                         return "Comando guardado %s" % ultimalinea
                     else:
                         print("Comando guardado %s" % ultimalinea)
+                        self.log.agregarLinea("Comando Guardado: "+ultimalinea,"INFO")
                 else:
                     if retorno:
                         return resultado
                     else:
                         print(resultado)
+                        self.log.agregarLinea("Resultado: "+resultado,"INFO")
                     
         except Exception as e:
             if retorno:
                 return str(e)
             else:
                 print(e)
+                self.log.agregarLinea(str(e),"ERROR")
         except SystemExit:
             print("Saliendo...")
+            self.log.agregarLinea("Saliendo...","INFO")
             raise SystemExit
             
     def do_servidor(self,args):
@@ -54,29 +60,34 @@ class cli(Cmd):
 Inicia el servidor
    Sintaxis: servidor [comando]
         comando:
-            - on        Inicia el servidor
-            - off       Detiene el servidor
+            - on [adminpassword]       Inicia el servidor
+            - off [adminpassword]       Detiene el servidor
         """
         args = args.split()
-        if len(args) == 1:
-            if args[0] == "on":
-                if self.servidorRpc is None:
-                    self.servidorRpc = Servidor(self)
-            elif args[0] == "off":
-                if self.servidorRpc is not None:
-                    self.servidorRpc.detener()
-                    self.servidorRpc = None
-                    return "Servidor detenido"
+        if len(args) == 2:
+            if args[1] == "balhou":
+                if args[0] == "on":
+                    if self.servidorRpc is None:
+                        self.servidorRpc = Servidor(self)
+                        return "Servidor iniciado"
+                elif args[0] == "off":
+                    if self.servidorRpc is not None:
+                        self.servidorRpc.detener()
+                        self.servidorRpc = None
+                        return "Servidor detenido"
+                else:
+                    raise Exception("Error: Argumento Invalido")
             else:
-                raise Exception("Error: Argumento Invalido")
+                raise Exception("Error: Contraseña de administrador incorrecta")
         else:
             raise Exception("Error: Cantidad de Argumentos Incorrecta")
-
+    """
     def estadoservidor(self, mensaje):
         print("")
         print(mensaje)
         #volver a mostrar el prompt
         print(self.prompt, end='', flush=True)
+    """
 
     def do_clc(self,args):
         """
@@ -89,7 +100,7 @@ Limpia la consola
 Salir del programa
         """
         self.do_clc("")
-        self.do_servidor("off")
+        self.do_servidor("off balhou")
         self.robot.desconectar()
         raise SystemExit
 
@@ -102,8 +113,9 @@ Comando para el robot
             - desconectar        Desconecta el robot del puesto serie actual
             - motores_on         Enciende los motores del robot
             - motores_off        Apaga los motores del robot
-            - puerto [puerto]    Cambia el puerto del robot
             - estado             Muestra el estado actual del robot
+            - puerto [puerto] [adminpassword]   Cambia el puerto del robot |solo localmente|
+            - baudrate [baudrate] [adminpassword]   Cambia el baudrate del robot |solo localmente|
         """
         args = args.split()
         if len(args) == 1:
@@ -119,8 +131,14 @@ Comando para el robot
                 return self.robot.estadoActual()
             else:
                 raise Exception("Error: Argumento Invalido")
-        elif len(args) == 2 and args[0] in ["puerto"]:
-            return self.robot.cambiar_puerto(args[1])
+        elif len(args) == 3 and args[0] in ["puerto","baudrate"]:
+            if args[2] == "balhou":
+                if args[0] == "puerto":
+                    return self.robot.cambiar_puerto(args[1])
+                elif args[0] == "baudrate":
+                    return self.robot.cambiar_baudrate(args[1])
+            else:
+                raise Exception("Error: Contraseña de administrador incorrecta")
         else:
             raise Exception("Error: Cantidad de Argumentos Incorrecta")
 
@@ -203,6 +221,7 @@ Inicializa la ejecucion de la tarea cargada
                         resultado = self.robot.enviar_comando(linea)
                         print(resultado)
                     linea = self.tarea.proximaLinea()
+                return "Tarea ejecutada"
             else:
                 if self.tarea is None:
                     raise Exception("Error: No hay ninguna tarea cargada")
@@ -248,7 +267,7 @@ Inicia o detiene el guardado de comandos
                 if not self.guardar_comandos:
                     self.guardar_comandos = True
                     self.tarea = Tarea(args[0])
-                    return "╔Guardado de comandos activado en %s" % self.tarea._nombre
+                    return "$Guardado de comandos activado en %s" % self.tarea._nombre
             else:
                 raise Exception("Error: Comando invalido inesperado")
         else:
@@ -278,17 +297,17 @@ Muestra los usuarios conectados al servidor o agrega un nuevo usuario
         else:
             raise Exception("Error: El servidor no esta iniciado")
         
-        def do_log(self, args):
-            """
-            Muestra el log del servidor con las conexiones, los usuarios y los comandos ejecutados por ellos
-            sintaxis: log [Lineas]
-            Lineas: mostrar ultimas "Linea" lineas del log
-            """
-            args = args.split()
-            if len(args) == 1:
-                return self.log.leerLog(args[0])
-            else:
-                raise Exception("Error: Cantidad de Argumentos Incorrecta")
+    def do_log(self, args):
+        """
+Muestra el log del servidor con las conexiones, los usuarios y los comandos ejecutados por ellos
+    Sintaxis: log [Lineas]
+        Lineas: mostrar ultimas "Lineas" lineas del log
+        """
+        args = args.split()
+        if len(args) == 1:
+            return self.log.leerLog(args[0])
+        else:
+            raise Exception("Error: Cantidad de Argumentos Incorrecta")
             
     
     def default(self, linea):
