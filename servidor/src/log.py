@@ -18,17 +18,21 @@ class Log():
             print(f"Error inesperado: {e}")
             return None
 
-    def agregarLinea(self, linea, tipo, usuario = "", ip = "", gerarquiaUsuario = ""):
+    def agregarLinea(self, linea, tipo, usuario = "", ip = "", jerarquiaUsuario = ""):
         ## Agrega una linea al log con el siguiente formato "Fecha Hora Tipo: linea"
         try:
             with open(f"{self.path}\\{self.nombre}.txt", "a") as f:
+                linea = linea.replace("\r","")
+                linea = linea.replace("\n","")
+                linea = linea.replace("\n","\t|\t")
+                #Si encuentra la palabra error en la linea, el tipo cambia a ERROR
                 log = f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S') } {tipo}"
                 if ip != "":
                     log += f" IP: {ip}"
                 if usuario != "":
                     log += f" USER: {usuario} "
-                if gerarquiaUsuario != "":
-                    log += f" ROL: {gerarquiaUsuario} "
+                if jerarquiaUsuario != "":
+                    log += f" ROL: {jerarquiaUsuario} "
                 log += f": {linea}\n"
                 f.write(log)
             f.close()
@@ -39,14 +43,15 @@ class Log():
         
     def leerLog(self,ultimasLineas):
         ## Lee las ultimas lineas del log
+        ultimasLineas = int(ultimasLineas)
         try:
             with open(f"{self.path}\\{self.nombre}.txt", "r") as f:
                 lineas = f.readlines()
                 f.close()
             if ultimasLineas > len(lineas):
-                return lineas #Si se pide mas lineas de las que hay, devuelve todas
+                return "$"+''.join(lineas) #Si se pide mas lineas de las que hay, devuelve todas
             else:
-                return lineas[-ultimasLineas:]
+                return "$"+''.join(lineas[-ultimasLineas:])
         except Exception as e:
             print(f"Error inesperado: {e}")
             return None

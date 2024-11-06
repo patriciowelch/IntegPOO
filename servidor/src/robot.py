@@ -7,28 +7,23 @@ import threading
 
 class Robot():
     def __init__(self, timeout=1,velMax=100):
-        self.path = "servidor/anexo/serialConfig.json"
+        self.path = "servidor/anexo/config.json"
         with open(self.path) as file:
             data = json.load(file)
-            self._puerto = data["puerto"]
-            self._baudrate = data["baudrate"]
+            self._puerto = data["robot"]["puerto"]
+            self._baudrate = data["robot"]["baudrate"]
         self._timeout = timeout
         self._velMax = velMax
         self.serial = None
         self.motor = False
         self.sound_thread = None
         self.log = Log("Log_Robot")
-        pass
 
     def addToLog (self, mensaje):
         # Si la primera palabra del mensaje es "Error", se agrega al log como error, eliminando la palabra ERROR, si no es un error se agrega como info
         # Si el ultimo caracter es un salto de linea, se elimina solo el ultimo caracter
-        if mensaje[-1] == '\n':
-            mensaje = mensaje[:-1]
-        if mensaje[-1] == '\r':
-            mensaje = mensaje[:-1]
-        if mensaje.split()[0] == "Error:": 
-            mensaje = mensaje.replace("Error: ","")
+        if mensaje.split()[0] == "ERROR:":
+            mensaje = mensaje.replace("ERROR: ","")
             self.log.agregarLinea(mensaje, "ERROR")
         elif mensaje.split()[0] == "INFO:":
             mensaje = mensaje.replace("INFO: ","")

@@ -1,10 +1,10 @@
 from xmlrpc.server import SimpleXMLRPCServer
 from xmlrpc.server import SimpleXMLRPCRequestHandler
 from threading import Thread
-from log import Log
 import socket
 from clientes import Clientes
 import base64
+import json
 
 class Handler(SimpleXMLRPCRequestHandler):
     def __init__(self, request, client_address, server):
@@ -22,15 +22,24 @@ class Servidor(SimpleXMLRPCServer):
         self.clientes = Clientes()
         self.clientes.cargar_clientes()
         self.tokensvalidos = []
-
-        addr = ('192.168.0.117', self.puerto)
+        with open("servidor/anexo/config.json") as f:
+            config = json.load(f)
+            ipaddr = config["servidor"]["ip"]
+            if self.puerto != config["servidor"]["puerto"]:
+                self.puerto = config["servidor"]["puerto"]
+        addr = (ipaddr, self.puerto)
 
         try:
             super().__init__(addr, requestHandler, logRequests, allow_none, encoding, bind_and_activate,
                              use_builtin_types)
             
         except socket.error as e:
-            print(self.consola.log.agregarLinea(e,"ERROR"))
+            if e.errno == 98:
+                raise Exception(self.consola.log.agregarLinea("Error al iniciar servidor RPC: Puerto en uso","ERROR"))
+            elif e.errno == 11001:
+                raise Exception(self.consola.log.agregarLinea("Error al iniciar servidor RPC: No se pudo resolver la direccion ip","ERROR"))
+            else:
+                raise Exception(self.consola.log.agregarLinea(e,"ERROR"))
 
         #aca se agregan los metodos que son accesibles al cliente
         self.register_function(self._iniciar_sesion, 'iniciar_sesion')
@@ -46,6 +55,7 @@ class Servidor(SimpleXMLRPCServer):
         self.register_function(self._defguardar, ':')
         self.register_function(self._help, 'help')
         self.register_function(self._enviarArchivo, 'enviarArchivo')
+        self.register_function(self._log, 'log')
 
         self.hiloRPC = Thread(target = self.correrServidor, daemon = True)
         self.hiloRPC.start()
@@ -236,15 +246,26 @@ class Servidor(SimpleXMLRPCServer):
             return self.consola.log.agregarLinea("Token invalido o expirado","ERROR 401")
         
     def _enviarArchivo(self, token, *args):
-        if token not in self.tokensvalidos:
+        if token in self.tokensvalidos:
             usuarioValido = self.clientes.get_usuario_ip_con_token(token)
             self.consola.log.agregarLinea(f"Usuario solicita enviar archivo","INFO",usuarioValido.nick,usuarioValido.ipActual)
-            if len(args) == 1:
-                gcode_content = base64.b64decode(args[0])
-                with open(f"servidor/anexo/Task_Files/{args[0]}.gcode", "wb") as f:
+            if len(args) == 2:
+                gcode_content = base64.b64decode(args[1])
+                with open(f"servidor/anexo/Task_Files/{args[0]}", "wb") as f:
                     f.write(gcode_content)
-                return self.consola.log.agregarLinea(f"Archivo con nombre {args[0]}.gcode recibido con exito","INFO",usuarioValido.nick,usuarioValido.ipActual)
+                return self.consola.log.agregarLinea(f"Archivo con nombre {args[0]} recibido con exito","INFO",usuarioValido.nick,usuarioValido.ipActual)
             else:
                 return self.consola.log.agregarLinea("Cantidad de argumentos invalido","ERROR ENVIARARCHIVO",usuarioValido.nick,usuarioValido.ipActual)
+        else:
+            return self.consola.log.agregarLinea("Token invalido o expirado","ERROR 401")
+        
+    def _log(self, token, *args):
+        if token in self.tokensvalidos:
+            usuarioValido = self.clientes.get_usuario_ip_con_token(token)
+            if len(args) == 0:
+                self.consola.log.agregarLinea("Usuario solicita ver el log","INFO",usuarioValido.nick,usuarioValido.ipActual)
+                return self.consola.onecmd("log 20",True)
+            else:
+                return self.consola.log.agregarLinea("Cantidad de argumentos invalido","ERROR LOG",usuarioValido.nick,usuarioValido.ipActual)
         else:
             return self.consola.log.agregarLinea("Token invalido o expirado","ERROR 401")

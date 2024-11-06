@@ -11,7 +11,7 @@ class cli(Cmd):
     def __init__(self):
         Cmd.__init__(self)
         self.prompt = '>>> '
-        self.intro = 'Bienvenido'
+        self.intro = 'Bienvenido | Ingrese "help" para ver los comandos disponibles'
         self.servidorRpc = None
         self.guardar_comandos = False
         self.robot = Robot()
@@ -41,8 +41,11 @@ class cli(Cmd):
                     if retorno:
                         return resultado
                     else:
-                        print(resultado)
-                        self.log.agregarLinea("Resultado: "+resultado,"INFO")
+                        if resultado.startswith("$"):
+                            print(resultado[1:])
+                        if not resultado.startswith("$"):
+                            print(resultado)
+                            self.log.agregarLinea("Resultado: "+resultado,"INFO")
                     
         except Exception as e:
             if retorno:
@@ -81,13 +84,6 @@ Inicia el servidor
                 raise Exception("Error: Contraseña de administrador incorrecta")
         else:
             raise Exception("Error: Cantidad de Argumentos Incorrecta")
-    """
-    def estadoservidor(self, mensaje):
-        print("")
-        print(mensaje)
-        #volver a mostrar el prompt
-        print(self.prompt, end='', flush=True)
-    """
 
     def do_clc(self,args):
         """
