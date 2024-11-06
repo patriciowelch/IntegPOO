@@ -215,17 +215,28 @@ private:
             {
                 methods.push_back(static_cast<string>(result[i]));
             }
+            int long_max = 0;
             for (int i = 0; i < methods.size(); i++)
             {
                 if (find(non_listmethods.begin(), non_listmethods.end(), methods[i]) != non_listmethods.end())
                 {
                     methods.erase(methods.begin() + i);
+                    continue;
+                }
+                if (methods[i].length() > long_max)
+                {
+                    long_max = methods[i].length();
                 }
             }
+            long_max +=4;
             for (int i = 0; i < methods.size(); i++)
             {
-                cout << methods[i] << "    ";
-                if(i%6==0 && i!=0){
+                cout << methods[i];
+                for (int j = 0; j < long_max - methods[i].length(); j++)
+                {
+                    cout << " ";
+                }
+                if(i%3==0 && i!=0){
                     cout << endl;
                 }
             }

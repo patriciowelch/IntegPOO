@@ -11,7 +11,7 @@ class cli(Cmd):
     def __init__(self):
         Cmd.__init__(self)
         self.prompt = '>>> '
-        self.intro = 'Bienvenido'
+        self.intro = 'Bienvenido | Ingrese "help" para ver los comandos disponibles'
         self.servidorRpc = None
         self.guardar_comandos = False
         self.robot = Robot()
