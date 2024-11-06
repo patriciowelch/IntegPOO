@@ -84,13 +84,6 @@ Inicia el servidor
                 raise Exception("Error: Contraseña de administrador incorrecta")
         else:
             raise Exception("Error: Cantidad de Argumentos Incorrecta")
-    """
-    def estadoservidor(self, mensaje):
-        print("")
-        print(mensaje)
-        #volver a mostrar el prompt
-        print(self.prompt, end='', flush=True)
-    """
 
     def do_clc(self,args):
         """
